@@ -26,12 +26,12 @@
 ### Graph
 ```mermaid
 graph TD;
-  elsa-studio-dashboard --> stencil-route-link
-  elsa-studio-dashboard --> stencil-route
-  elsa-studio-dashboard --> stencil-router
-  elsa-studio-dashboard --> stencil-route-switch
-  elsa-studio-dashboard --> context-consumer
-  style elsa-studio-dashboard fill:#f9f,stroke:#333,stroke-width:4px
+  coras-studio-dashboard --> stencil-route-link
+  coras-studio-dashboard --> stencil-route
+  coras-studio-dashboard --> stencil-router
+  coras-studio-dashboard --> stencil-route-switch
+  coras-studio-dashboard --> context-consumer
+  style coras-studio-dashboard fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

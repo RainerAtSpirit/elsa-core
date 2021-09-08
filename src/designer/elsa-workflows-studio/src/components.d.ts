@@ -17,6 +17,13 @@ import { PagerData } from "./components/controls/elsa-pager/elsa-pager";
 import { ToastNotificationOptions } from "./components/shared/elsa-toast-notification/elsa-toast-notification";
 import { WebhookDefinition } from "./modules/elsa-webhooks/models";
 export namespace Components {
+    interface CorasStudioDashboard {
+        "basePath": string;
+        "culture": string;
+    }
+    interface CorasStudioHome {
+        "culture": string;
+    }
     interface ElsaActivityEditorModal {
         "culture": string;
     }
@@ -312,6 +319,18 @@ export namespace Components {
     }
 }
 declare global {
+    interface HTMLCorasStudioDashboardElement extends Components.CorasStudioDashboard, HTMLStencilElement {
+    }
+    var HTMLCorasStudioDashboardElement: {
+        prototype: HTMLCorasStudioDashboardElement;
+        new (): HTMLCorasStudioDashboardElement;
+    };
+    interface HTMLCorasStudioHomeElement extends Components.CorasStudioHome, HTMLStencilElement {
+    }
+    var HTMLCorasStudioHomeElement: {
+        prototype: HTMLCorasStudioHomeElement;
+        new (): HTMLCorasStudioHomeElement;
+    };
     interface HTMLElsaActivityEditorModalElement extends Components.ElsaActivityEditorModal, HTMLStencilElement {
     }
     var HTMLElsaActivityEditorModalElement: {
@@ -625,6 +644,8 @@ declare global {
         new (): HTMLElsaWorkflowSettingsModalElement;
     };
     interface HTMLElementTagNameMap {
+        "coras-studio-dashboard": HTMLCorasStudioDashboardElement;
+        "coras-studio-home": HTMLCorasStudioHomeElement;
         "elsa-activity-editor-modal": HTMLElsaActivityEditorModalElement;
         "elsa-activity-picker-modal": HTMLElsaActivityPickerModalElement;
         "elsa-check-list-property": HTMLElsaCheckListPropertyElement;
@@ -680,6 +701,13 @@ declare global {
     }
 }
 declare namespace LocalJSX {
+    interface CorasStudioDashboard {
+        "basePath"?: string;
+        "culture"?: string;
+    }
+    interface CorasStudioHome {
+        "culture"?: string;
+    }
     interface ElsaActivityEditorModal {
         "culture"?: string;
     }
@@ -969,6 +997,8 @@ declare namespace LocalJSX {
         "workflowDefinition"?: WorkflowDefinition;
     }
     interface IntrinsicElements {
+        "coras-studio-dashboard": CorasStudioDashboard;
+        "coras-studio-home": CorasStudioHome;
         "elsa-activity-editor-modal": ElsaActivityEditorModal;
         "elsa-activity-picker-modal": ElsaActivityPickerModal;
         "elsa-check-list-property": ElsaCheckListProperty;
@@ -1027,6 +1057,8 @@ export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
+            "coras-studio-dashboard": LocalJSX.CorasStudioDashboard & JSXBase.HTMLAttributes<HTMLCorasStudioDashboardElement>;
+            "coras-studio-home": LocalJSX.CorasStudioHome & JSXBase.HTMLAttributes<HTMLCorasStudioHomeElement>;
             "elsa-activity-editor-modal": LocalJSX.ElsaActivityEditorModal & JSXBase.HTMLAttributes<HTMLElsaActivityEditorModalElement>;
             "elsa-activity-picker-modal": LocalJSX.ElsaActivityPickerModal & JSXBase.HTMLAttributes<HTMLElsaActivityPickerModalElement>;
             "elsa-check-list-property": LocalJSX.ElsaCheckListProperty & JSXBase.HTMLAttributes<HTMLElsaCheckListPropertyElement>;
