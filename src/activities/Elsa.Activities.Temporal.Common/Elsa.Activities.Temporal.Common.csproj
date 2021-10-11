@@ -2,9 +2,9 @@
 
     <Import Project="..\..\..\common.props" />
     <Import Project="..\..\..\configureawait.props" />
-    
+
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>       
+        <TargetFramework>netstandard2.1</TargetFramework>
         <Description>
             Elsa is a set of workflow libraries and tools that enable lean and mean workflowing capabilities in any .NET Core application.
             This package provides common/shared logic for the following temporal (time-based) activities:
@@ -17,12 +17,16 @@
 
             * Elsa.Activities.Temporal.Hangfire
             * Elsa.Activities.Temporal.Quartz
-        </Description>        
+        </Description>
         <PackageTags>elsa, workflows, timers, background tasks</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\core\Elsa.Core\Elsa.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Polly" Version="7.2.2" />
     </ItemGroup>
 
 </Project>

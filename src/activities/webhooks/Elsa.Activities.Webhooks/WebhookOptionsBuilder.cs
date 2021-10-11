@@ -1,6 +1,5 @@
 using System;
 using Elsa.Activities.Webhooks.Options;
-using Elsa.Caching;
 using Elsa.Webhooks.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,13 +9,10 @@ namespace Elsa.Activities.Webhooks
     {
         public WebhookOptionsBuilder(IServiceCollection services)
         {
-            WebhookOptions = new WebhookOptions();
             Services = services;
-            services.AddMemoryCache();
-            services.AddSingleton<ICacheSignal, CacheSignal>();
         }
 
-        public WebhookOptions WebhookOptions { get; }
+        public WebhookOptions WebhookOptions { get; } = new();
         public IServiceCollection Services { get; }
 
         public WebhookOptionsBuilder UseWebhookDefinitionStore(Func<IServiceProvider, IWebhookDefinitionStore> factory)

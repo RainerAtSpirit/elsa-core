@@ -1,5 +1,5 @@
-import {Component, Host, h, Prop, State, Listen, Method} from '@stencil/core';
-import {enter, leave, toggle} from 'el-transition'
+import {Component, Host, h, State, Listen, Method, Event, EventEmitter} from '@stencil/core';
+import {enter, leave} from 'el-transition'
 import {eventBus} from "../../../services";
 import {EventTypes} from "../../../models";
 
@@ -8,7 +8,8 @@ import {EventTypes} from "../../../models";
   shadow: false,
 })
 export class ElsaModalDialog {
-
+  @Event() shown: EventEmitter;
+  @Event() hidden: EventEmitter;
   @State() isVisible: boolean;
   overlay: HTMLElement
   modal: HTMLElement
@@ -18,14 +19,19 @@ export class ElsaModalDialog {
   }
 
   @Method()
-  async show(animate: boolean) {
+  async show(animate: boolean = true) {
     this.showInternal(animate);
   }
 
   @Method()
-  async hide(animate: boolean) {
-    eventBus.emit(EventTypes.HideModalDialog);
+  async hide(animate: boolean = true) {
+    await eventBus.emit(EventTypes.HideModalDialog);
     this.hideInternal(animate);
+  }
+
+  handleDefaultClose = async () => {
+    console.log('handleDefaultClose');
+    await this.hide();
   }
 
   showInternal(animate: boolean) {
@@ -37,7 +43,7 @@ export class ElsaModalDialog {
     }
 
     enter(this.overlay);
-    enter(this.modal);
+    enter(this.modal).then(this.shown.emit);
   }
 
   hideInternal(animate: boolean) {
@@ -46,14 +52,25 @@ export class ElsaModalDialog {
     }
 
     leave(this.overlay);
-    leave(this.modal).then(() => this.isVisible = false);
+    leave(this.modal).then(() => {
+      this.isVisible = false;
+      this.hidden.emit();
+    });
+  }
+
+  @Listen('keydown', {target: 'window'})
+  async handleKeyDown(e: KeyboardEvent) {
+    if (this.isVisible && e.key === 'Escape') {
+      await this.hide(true);
+    }
   }
 
   renderModal() {
     return (
       <Host class={{'hidden': !this.isVisible, 'elsa-block': true}}>
         <div class="elsa-fixed elsa-z-10 elsa-inset-0 elsa-overflow-y-auto">
-          <div class="elsa-flex elsa-items-end elsa-justify-center elsa-min-h-screen elsa-pt-4 elsa-px-4 elsa-pb-20 elsa-text-center sm:elsa-block sm:elsa-p-0">
+          <div
+            class="elsa-flex elsa-items-end elsa-justify-center elsa-min-h-screen elsa-pt-4 elsa-px-4 elsa-pb-20 elsa-text-center sm:elsa-block sm:elsa-p-0">
             <div ref={el => this.overlay = el}
                  onClick={() => this.hide(true)}
                  data-transition-enter="elsa-ease-out elsa-duration-300" data-transition-enter-start="elsa-opacity-0"
@@ -80,6 +97,7 @@ export class ElsaModalDialog {
               <slot name="buttons">
                 <div class="elsa-bg-gray-50 elsa-px-4 elsa-py-3 sm:elsa-px-6 sm:elsa-flex sm:elsa-flex-row-reverse">
                   <button type="button"
+                          onClick={this.handleDefaultClose}
                           class="elsa-mt-3 elsa-w-full elsa-inline-flex elsa-justify-center elsa-rounded-md elsa-border elsa-border-gray-300 elsa-shadow-sm elsa-px-4 elsa-py-2 elsa-bg-white elsa-text-base elsa-font-medium elsa-text-gray-700 hover:elsa-bg-gray-50 focus:elsa-outline-none focus:elsa-ring-2 focus:elsa-ring-offset-2 focus:elsa-ring-blue-500 sm:elsa-mt-0 sm:elsa-ml-3 sm:elsa-w-auto sm:elsa-text-sm">
                     Close
                   </button>

@@ -9,27 +9,28 @@ namespace Elsa
 {
     public static class ObjectConverter
     {
-        public static T? ConvertTo<T>(this object? value) => (T?) value.ConvertTo(typeof(T));
+        public static T? ConvertTo<T>(this object? value) => value != null ? (T?)value.ConvertTo(typeof(T)) : default;
 
         public static object? ConvertTo(this object? value, Type targetType)
         {
             if (value == null)
                 return default!;
+            
+            var sourceType = value.GetType();
+
+            if (sourceType == targetType)
+                return value;
 
             var underlyingTargetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
             
             if (targetType == typeof(object))
                 return value;
-            
-            var sourceType = value.GetType();
+
             var underlyingSourceType = Nullable.GetUnderlyingType(sourceType) ?? sourceType;
 
             if (underlyingSourceType == underlyingTargetType)
                 return value;
 
-            if (value == default!)
-                return default!;
-            
             if(typeof(JToken).IsAssignableFrom(underlyingSourceType))
                 return StateDictionaryExtensions.DeserializeState((JToken) value, underlyingTargetType);
 
@@ -63,7 +64,6 @@ namespace Elsa
             {
                 throw new TypeConversionException($"Failed to convert an object of type {sourceType} to {underlyingTargetType}", value, underlyingTargetType, e);
             }
-            
         }
     }
 }

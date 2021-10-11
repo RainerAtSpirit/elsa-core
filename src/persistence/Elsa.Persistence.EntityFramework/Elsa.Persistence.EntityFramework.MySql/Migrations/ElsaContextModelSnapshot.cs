@@ -16,7 +16,7 @@ namespace Elsa.Persistence.EntityFramework.MySql.Migrations
             modelBuilder
                 .HasDefaultSchema("Elsa")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.6");
+                .HasAnnotation("ProductVersion", "5.0.10");
 
             modelBuilder.Entity("Elsa.Models.Bookmark", b =>
                 {
@@ -114,9 +114,6 @@ namespace Elsa.Persistence.EntityFramework.MySql.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("varchar(255)");
-
-                    b.Property<string>("OutputStorageProviderName")
-                        .HasColumnType("longtext");
 
                     b.Property<int>("PersistenceBehavior")
                         .HasColumnType("int");

@@ -56,7 +56,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             TypeDescriptor.AddAttributes(typeof(Type), new TypeConverterAttribute(typeof(TypeTypeConverter)));
         }
-        
+
         public static IServiceCollection AddElsaCore(
             this IServiceCollection services,
             Action<ElsaOptionsBuilder>? configure = default)
@@ -91,10 +91,13 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddConfiguration()
                 .AddCoreActivities();
 
-            services.Decorate<IWorkflowDefinitionStore, InitializingWorkflowDefinitionStore>();
-            services.Decorate<IWorkflowDefinitionStore, EventPublishingWorkflowDefinitionStore>();
-            services.Decorate<IWorkflowInstanceStore, EventPublishingWorkflowInstanceStore>();
-            services.Decorate<IWorkflowInstanceExecutor, LockingWorkflowInstanceExecutor>();
+            services
+                .Decorate<IWorkflowDefinitionStore, InitializingWorkflowDefinitionStore>()
+                .Decorate<IWorkflowDefinitionStore, EventPublishingWorkflowDefinitionStore>()
+                .Decorate<IWorkflowInstanceStore, EventPublishingWorkflowInstanceStore>()
+                .Decorate<IWorkflowInstanceExecutor, LockingWorkflowInstanceExecutor>()
+                .Decorate<IWorkflowInstanceCanceller, LockingWorkflowInstanceCanceller>()
+                .Decorate<IWorkflowInstanceDeleter, LockingWorkflowInstanceDeleter>();
 
             //TenantId default source
             services.TryAddScoped<ITenantAccessor, DefaultTenantAccessor>();
@@ -127,7 +130,7 @@ namespace Microsoft.Extensions.DependencyInjection
             elsaOptions.Services.AddTransient<IHandleMessages<TMessage>, TConsumer>();
             return elsaOptions;
         }
-        
+
         public static ElsaOptionsBuilder AddPubSubConsumer<TConsumer, TMessage>(this ElsaOptionsBuilder elsaOptions, string? queueName = default) where TConsumer : class, IHandleMessages<TMessage>
         {
             elsaOptions.Services.AddTransient<IHandleMessages<TMessage>, TConsumer>();
@@ -138,7 +141,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddActivityPropertyOptionsProvider<T>(this IServiceCollection services) where T : class, IActivityPropertyOptionsProvider => services.AddSingleton<IActivityPropertyOptionsProvider, T>();
         public static IServiceCollection AddRuntimeSelectItemsProvider<T>(this IServiceCollection services) where T : class, IRuntimeSelectListItemsProvider => services.AddScoped<IRuntimeSelectListItemsProvider, T>();
         public static IServiceCollection AddActivityTypeProvider<T>(this IServiceCollection services) where T : class, IActivityTypeProvider => services.AddSingleton<IActivityTypeProvider, T>();
-        
+
         public static IServiceCollection AddWorkflowStorageProvider<T>(this IServiceCollection services) where T : class, IWorkflowStorageProvider =>
             services
                 .AddSingleton<T>()
@@ -174,6 +177,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddScoped<IWorkflowInstanceExecutor, WorkflowInstanceExecutor>()
                 .AddScoped<IWorkflowTriggerInterruptor, WorkflowTriggerInterruptor>()
                 .AddScoped<IWorkflowReviver, WorkflowReviver>()
+                .AddScoped<IWorkflowInstanceCanceller, WorkflowInstanceCanceller>()
+                .AddScoped<IWorkflowInstanceDeleter, WorkflowInstanceDeleter>()
                 .AddSingleton<IWorkflowFactory, WorkflowFactory>()
                 .AddTransient<IWorkflowBlueprintMaterializer, WorkflowBlueprintMaterializer>()
                 .AddSingleton<IWorkflowBlueprintReflector, WorkflowBlueprintReflector>()
@@ -182,12 +187,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddScoped<IWorkflowContextManager, WorkflowContextManager>()
                 .AddScoped<IActivityTypeService, ActivityTypeService>()
                 .AddActivityTypeProvider<TypeBasedActivityProvider>()
-                .AddScoped<IWorkflowExecutionLog, WorkflowExecutionLog>()
                 .AddTransient<ICreatesWorkflowExecutionContextForWorkflowBlueprint, WorkflowExecutionContextForWorkflowBlueprintFactory>()
                 .AddTransient<ICreatesActivityExecutionContextForActivityBlueprint, ActivityExecutionContextForActivityBlueprintFactory>()
                 .AddTransient<IGetsStartActivities, GetsStartActivitiesProvider>()
                 ;
-            
+
             // Data Protection.
             services.AddDataProtection();
 
@@ -213,14 +217,14 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddWorkflowProvider<DatabaseWorkflowProvider>();
 
             services.Configure<BlobStorageWorkflowProviderOptions>(o => o.BlobStorageFactory = StorageFactory.Blobs.InMemory);
-            
+
             // Workflow Storage Providers.
             services
                 .AddSingleton<IWorkflowStorageService, WorkflowStorageService>()
                 .AddWorkflowStorageProvider<TransientWorkflowStorageProvider>()
                 .AddWorkflowStorageProvider<WorkflowInstanceWorkflowStorageProvider>()
                 .AddWorkflowStorageProvider<BlobStorageWorkflowStorageProvider>();
-            
+
             services.Configure<BlobStorageWorkflowStorageProviderOptions>(o => o.BlobStorageFactory = StorageFactory.Blobs.InMemory);
 
             // Metadata.

@@ -2,12 +2,12 @@
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <Authors>Elsa Contributors</Authors>
-    <Copyright>2020</Copyright> 
+    <Copyright>2021</Copyright> 
     <PackageProjectUrl>https://github.com/elsa-workflows/elsa-core</PackageProjectUrl>
     <RepositoryUrl>https://github.com/elsa-workflows/elsa-core</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Nullable>enable</Nullable>
-    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIconUrl>https://elsa-workflows.github.io/elsa-core/img/android-icon-192x192.png</PackageIconUrl>
       
     <!--<GenerateDocumentationFile>true</GenerateDocumentationFile> -->

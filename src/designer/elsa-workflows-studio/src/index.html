@@ -20,11 +20,11 @@
 
   <!-- Instead of using the full dashboard component, you can display lower-level components instead-->
   <!--<elsa-workflow-instance-list-screen></elsa-workflow-instance-list-screen>-->
-  <!--<elsa-workflow-definition-editor-screen></elsa-workflow-definition-editor-screen>-->
+  <!--<elsa-workflow-definition-editor-screen workflow-definition-id="{workflowDefinitionId}"></elsa-workflow-definition-editor-screen>-->
 </elsa-studio-root>
 
-<!-- Keep this to avoid Stencil from stripping classes added by dagre-d3 <!-->
-<div class="node add label-container hidden"></div>
+<!-- Keep this to avoid Stencil from stripping classes added by dagre-d3 and dynamically computed classes <!-->
+<div class="node add label-container hidden elsa-border-blue-600 elsa-border-green-600 elsa-border-red-200 elsa-border-blue-200 elsa-border-green-200 elsa-border-red-200 elsa-bg-gray-600 elsa-bg-rose-600 elsa-bg-blue-600 elsa-bg-green-600 elsa-bg-red-600 elsa-bg-yellow-600"></div>
 
 <script type="module">
   // Integration demos.
@@ -207,7 +207,7 @@
   // Get a handle to the elsa-studio-root element.
   const elsaStudioRoot = document.querySelector('elsa-studio-root');
 
-  // Alternatively, configure Elsa during the 'initializing' event.
+  // Configure Elsa during the 'initializing' event.
   elsaStudioRoot.addEventListener('initializing', e => {
     const elsa = e.detail;
     elsa.pluginManager.registerPlugins([

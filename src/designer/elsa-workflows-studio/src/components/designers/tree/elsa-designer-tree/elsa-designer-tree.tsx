@@ -18,7 +18,7 @@ import {
   ConnectionModel,
   EventTypes,
   WorkflowModel,
-  WorkflowPersistenceBehavior,
+  WorkflowPersistenceBehavior
 } from '../../../../models';
 import {eventBus} from '../../../../services';
 import * as d3 from 'd3';
@@ -44,6 +44,7 @@ export class ElsaWorkflowDesigner {
   @Prop() activityBorderColor?: (activity: ActivityModel) => string;
   @Prop() activityContextMenu?: ActivityContextMenuState;
   @Prop() connectionContextMenu?: ActivityContextMenuState;
+  @Prop() activityContextTestMenu?: ActivityContextMenuState;
   @Prop() mode: WorkflowDesignerMode = WorkflowDesignerMode.Edit;
   @Prop() layoutDirection: LayoutDirection = LayoutDirection.Vertical;
   @Prop({attribute: 'enable-multiple-connections'}) enableMultipleConnectionsFromSingleSource: boolean;
@@ -57,16 +58,26 @@ export class ElsaWorkflowDesigner {
   @Event() activityDeselected: EventEmitter<ActivityModel>;
   @Event() activityContextMenuButtonClicked: EventEmitter<ActivityContextMenuState>;
   @Event() connectionContextMenuButtonClicked: EventEmitter<ActivityContextMenuState>;
+  @Event() activityContextMenuButtonTestClicked: EventEmitter<ActivityContextMenuState>;
   @State() workflowModel: WorkflowModel;
+
 
   @State() activityContextMenuState: ActivityContextMenuState = {
     shown: false,
     x: 0,
     y: 0,
     activity: null,
+    selectedActivities: {}
   };
 
   @State() connectionContextMenuState: ActivityContextMenuState = {
+    shown: false,
+    x: 0,
+    y: 0,
+    activity: null,
+  };
+
+  @State() activityContextMenuTestState: ActivityContextMenuState = {
     shown: false,
     x: 0,
     y: 0,
@@ -101,6 +112,12 @@ export class ElsaWorkflowDesigner {
     this.connectionContextMenuButtonClicked.emit(state);
   }
 
+  handleContextMenuTestChange(state: ActivityContextMenuState) {
+    this.ignoreCopyPasteActivities = true;
+    this.activityContextMenuTestState = state;
+    this.activityContextMenuButtonTestClicked.emit(state);
+  }  
+
   @Watch('model')
   handleModelChanged(newValue: WorkflowModel) {
     this.updateWorkflowModel(newValue, false);
@@ -116,7 +133,7 @@ export class ElsaWorkflowDesigner {
       map[activity.activityId] = activity;
 
     this.selectedActivities = map;
-    this.rerenderTree();
+    this.safeRender();
   }
 
   @Watch('activityContextMenu')
@@ -128,6 +145,11 @@ export class ElsaWorkflowDesigner {
   handleConnectionContextMenuChanged(newValue: ActivityContextMenuState) {
     this.connectionContextMenuState = newValue;
   }
+
+  @Watch('activityContextTestMenu')
+  handleActivityContextMenuTestChanged(newValue: ActivityContextMenuState) {
+    this.activityContextMenuTestState = newValue;
+  }  
 
   @Listen('keydown', {target: 'window'})
   async handleKeyDown(event: KeyboardEvent) {
@@ -149,14 +171,25 @@ export class ElsaWorkflowDesigner {
   }
 
   @Method()
+  async removeSelectedActivities() {
+    let model = {...this.workflowModel};
+
+    Object.keys(this.selectedActivities).forEach((key) => {
+      model = this.removeActivityInternal(this.selectedActivities[key], model);
+    });
+
+    this.updateWorkflowModel(model);
+  }
+
+  @Method()
   async showActivityEditor(activity: ActivityModel, animate: boolean) {
-    this.showActivityEditorInternal(activity, animate);
+    await this.showActivityEditorInternal(activity, animate);
   }
 
   async copyActivitiesToClipboard() {
     this.checkClipboardPermissions();
     await navigator.clipboard.writeText(JSON.stringify(this.selectedActivities));
-    eventBus.emit(EventTypes.ClipboardCopied, this);
+    await eventBus.emit(EventTypes.ClipboardCopied, this);
   }
 
   async pasteActivitiesFromClipboard() {
@@ -167,7 +200,7 @@ export class ElsaWorkflowDesigner {
     await navigator.clipboard.readText().then(data => {
       copiedActivities = JSON.parse(data);
     });
-    this.addActivitiesFromClipboard(copiedActivities)
+    await this.addActivitiesFromClipboard(copiedActivities)
   }
 
   async addActivitiesFromClipboard(copiedActivities: Array<ActivityModel>) {
@@ -188,7 +221,7 @@ export class ElsaWorkflowDesigner {
       this.addingActivity = true;
       copiedActivities[key].activityId = uuid();
 
-      eventBus.emit(EventTypes.UpdateActivity, this, copiedActivities[key]);
+      await eventBus.emit(EventTypes.UpdateActivity, this, copiedActivities[key]);
 
       this.parentActivityId = copiedActivities[key].activityId;
       this.parentActivityOutcome = copiedActivities[key].outcomes[0];
@@ -232,22 +265,30 @@ export class ElsaWorkflowDesigner {
   componentDidLoad() {
     this.svgD3Selected = d3.select(this.svg);
     this.innerD3Selected = d3.select(this.inner);
+    this.safeRender();
+  }
+
+  safeRender() {
+    // Rebuild D3 model if component completed its initial load.
+    if (!this.svgD3Selected)
+      return;
+
     const rect = this.el.getBoundingClientRect();
     if (rect.height === 0 || rect.width === 0) {
       const observer = new ResizeObserver(entries => {
         for (let entry of entries) {
-          this.rerenderTree();
+          this.renderTree();
           observer.unobserve(this.el);
         }
       });
 
       observer.observe(this.el);
     } else {
-      this.rerenderTree();
+      this.renderTree();
     }
   }
 
-  componentWillRender() {
+  async componentWillRender() {
     if (!!this.activityDisplayContexts)
       return;
 
@@ -255,16 +296,13 @@ export class ElsaWorkflowDesigner {
     const displayContexts: Map<ActivityDesignDisplayContext> = {};
 
     for (const model of activityModels)
-      displayContexts[model.activityId] = this.getActivityDisplayContext(model);
+      displayContexts[model.activityId] = await this.getActivityDisplayContext(model);
 
     this.activityDisplayContexts = displayContexts;
-
-    // Rebuild D3 model if component completed its initial load.
-    if(!!this.svgD3Selected)
-      this.rerenderTree();
+    this.safeRender();
   }
 
-  getActivityDisplayContext(activityModel: ActivityModel): ActivityDesignDisplayContext {
+  async getActivityDisplayContext(activityModel: ActivityModel): Promise<ActivityDesignDisplayContext> {
     const activityDescriptors: Array<ActivityDescriptor> = state.activityDescriptors;
     let descriptor = activityDescriptors.find(x => x.type == activityModel.type);
     let descriptorExists = !!descriptor;
@@ -287,7 +325,7 @@ export class ElsaWorkflowDesigner {
       outcomes: [...activityModel.outcomes],
     };
 
-    eventBus.emit(EventTypes.ActivityDesignDisplaying, this, displayContext);
+    await eventBus.emit(EventTypes.ActivityDesignDisplaying, this, displayContext);
     return displayContext;
   }
 
@@ -305,12 +343,8 @@ export class ElsaWorkflowDesigner {
     };
   }
 
-  showActivityEditorInternal(activity: ActivityModel, animate: boolean) {
-    eventBus.emit(EventTypes.ShowActivityEditor, this, activity, animate);
-  }
-
-  handleEditActivity(activity: ActivityModel) {
-    this.showActivityEditorInternal(activity, true);
+  async showActivityEditorInternal(activity: ActivityModel, animate: boolean) {
+    await eventBus.emit(EventTypes.ActivityEditor.Show, this, activity, animate);
   }
 
   updateWorkflowModel(model: WorkflowModel, emitEvent: boolean = true) {
@@ -352,8 +386,8 @@ export class ElsaWorkflowDesigner {
     return model;
   }
 
-  removeActivityInternal(activity: ActivityModel) {
-    let workflowModel = {...this.workflowModel};
+  removeActivityInternal(activity: ActivityModel, model?: WorkflowModel) {
+    let workflowModel = model || {...this.workflowModel};
     const incomingConnections = getInboundConnections(workflowModel, activity.activityId);
     const outgoingConnections = getOutboundConnections(workflowModel, activity.activityId);
 
@@ -378,7 +412,14 @@ export class ElsaWorkflowDesigner {
           });
       }
     }
-    this.updateWorkflowModel(workflowModel);
+
+    delete this.selectedActivities[activity.activityId];
+
+    if (!model) {
+      this.updateWorkflowModel(workflowModel);
+    }
+
+    return workflowModel;
   }
 
   newActivity(activityDescriptor: ActivityDescriptor): ActivityModel {
@@ -401,19 +442,11 @@ export class ElsaWorkflowDesigner {
     return activity;
   }
 
-  createAndAddActivity(activityDescriptor: ActivityDescriptor, sourceActivityId?: string, targetActivityId?: string, outcome?: string): ActivityModel {
-    outcome = outcome || 'Done';
-
-    const activity = this.newActivity(activityDescriptor);
-    this.addActivity(activity, sourceActivityId, targetActivityId, outcome);
-    return activity;
-  }
-
-  addActivity(activity: ActivityModel, sourceActivityId?: string, targetActivityId?: string, outcome?: string) {
+  async addActivity(activity: ActivityModel, sourceActivityId?: string, targetActivityId?: string, outcome?: string) {
     outcome = outcome || 'Done';
 
     const workflowModel = {...this.workflowModel, activities: [...this.workflowModel.activities, activity]};
-    const activityDisplayContext = this.getActivityDisplayContext(activity);
+    const activityDisplayContext = await this.getActivityDisplayContext(activity);
 
     if (targetActivityId) {
       const existingConnection = workflowModel.connections.find(x => x.targetId == targetActivityId && x.outcome == outcome);
@@ -497,8 +530,8 @@ export class ElsaWorkflowDesigner {
     this.updateWorkflowModel({...workflowModel, activities: activities});
   }
 
-  showActivityPicker() {
-    eventBus.emit(EventTypes.ShowActivityPicker);
+  async showActivityPicker() {
+    await eventBus.emit(EventTypes.ShowActivityPicker);
   }
 
   removeConnection(sourceId: string, outcome: string) {
@@ -618,7 +651,7 @@ export class ElsaWorkflowDesigner {
     const activityDescriptor = args as ActivityDescriptor;
     const activityModel = this.newActivity(activityDescriptor);
     this.addingActivity = true;
-    this.showActivityEditorInternal(activityModel, false);
+    await this.showActivityEditorInternal(activityModel, false);
   };
 
   onUpdateActivity = args => {
@@ -643,7 +676,7 @@ export class ElsaWorkflowDesigner {
     this.selectedActivities = {};
     activityModel.outcomes[0] = this.parentActivityOutcome;
     this.selectedActivities[activityModel.activityId] = activityModel;
-    this.pasteActivitiesFromClipboard();
+    await this.pasteActivitiesFromClipboard();
   };
 
   onCopyPasteActivityEnabled = () => {
@@ -672,7 +705,7 @@ export class ElsaWorkflowDesigner {
         const node = this.graph.node(n) as any;
 
         d3.select(node.elem)
-          .on('click', e => {
+          .on('click', async e => {
             e.preventDefault();
             root.selectAll('.node.add svg').classed('elsa-text-green-400', false).classed('elsa-text-gray-400', true).classed('hover:elsa-text-blue-500', true);
             this.parentActivityId = node.activity.activityId;
@@ -683,7 +716,7 @@ export class ElsaWorkflowDesigner {
               return;
             }
 
-            this.showActivityPicker();
+            await this.showActivityPicker();
           })
           .on("mouseover", e => {
             if (e.shiftKey)
@@ -703,8 +736,8 @@ export class ElsaWorkflowDesigner {
 
       root.selectAll('.node.start').each((n: any) => {
         const node = this.graph.node(n) as any;
-        d3.select(node.elem).on('click', e => {
-          this.showActivityPicker();
+        d3.select(node.elem).on('click', async e => {
+          await this.showActivityPicker();
         });
       });
 
@@ -763,7 +796,24 @@ export class ElsaWorkflowDesigner {
             }
           }
 
-          this.rerenderTree();
+          // Delay the rerender of the tree to permit the double click action to be captured
+          setTimeout(() => {
+            this.safeRender();
+          }, 90);
+        }
+      }).on('dblclick', async e => {
+        e.stopPropagation();
+        if (this.mode == WorkflowDesignerMode.Edit) {
+          await this.showActivityEditor(activity, true);
+          if (!this.selectedActivities[activityId]) {
+            for (const key in this.selectedActivities) {
+              this.activityDeselected.emit(this.selectedActivities[key]);
+            }
+            this.selectedActivities = {};
+            this.selectedActivities[activityId] = activity;
+            this.activitySelected.emit(activity);
+            this.safeRender();
+          }
         }
       });
 
@@ -772,13 +822,27 @@ export class ElsaWorkflowDesigner {
           .select('.context-menu-button-container button')
           .on('click', evt => {
             evt.stopPropagation();
-            this.handleContextMenuChange({x: evt.clientX, y: evt.clientY, shown: true, activity: node.activity});
+            this.handleContextMenuChange({
+              x: evt.clientX,
+              y: evt.clientY,
+              shown: true,
+              activity: node.activity,
+              selectedActivities: this.selectedActivities
+            });
+          });
+      }
+      else if (this.mode == WorkflowDesignerMode.Test) {
+        d3.select(node.elem)
+          .select('.context-menu-button-container button')
+          .on('click', evt => {
+            evt.stopPropagation();
+            this.handleContextMenuTestChange({x: evt.clientX, y: evt.clientY, shown: true, activity: node.activity});
           });
       }
     });
   }
 
-  rerenderTree() {
+  renderTree() {
     this.applyZoom();
     this.setEntities();
     this.renderNodes();
@@ -814,7 +878,7 @@ export class ElsaWorkflowDesigner {
     const activityBorderColor = !!this.activityBorderColor ? this.activityBorderColor(activity) : 'gray';
     const selectedColor = !!this.activityBorderColor ? activityBorderColor : 'blue';
     const cssClass = !!this.selectedActivities[activity.activityId] ? `elsa-border-${selectedColor}-600` : `elsa-border-${activityBorderColor}-200 hover:elsa-border-${selectedColor}-600`;
-    const displayName = displayContext.displayName || activity.displayName;
+    const displayName = displayContext != undefined ? displayContext.displayName : activity.displayName;
     const typeName = activity.type;
 
     return `<div id=${`activity-${activity.activityId}`}
@@ -837,17 +901,17 @@ export class ElsaWorkflowDesigner {
       </div>`;
   }
 
-  renderActivityBody(displayContext: ActivityDesignDisplayContext) {
+  renderActivityBody(displayContext: ActivityDesignDisplayContext) {    
     return (
       `<div class="elsa-border-t elsa-border-t-solid">
           <div class="elsa-p-6 elsa-text-gray-400 elsa-text-sm">
-            <div class="elsa-mb-2">${!!displayContext.bodyDisplay ? displayContext.bodyDisplay : ''}</div>
+            <div class="elsa-mb-2">${displayContext != undefined ? displayContext.bodyDisplay : ''}</div>
             <div>
               <span class="elsa-inline-flex elsa-items-center elsa-px-2.5 elsa-py-0.5 elsa-rounded-full elsa-text-xs elsa-font-medium elsa-bg-gray-100 elsa-text-gray-500">
                 <svg class="-elsa-ml-0.5 elsa-mr-1.5 elsa-h-2 elsa-w-2 elsa-text-gray-400" fill="currentColor" viewBox="0 0 8 8">
                   <circle cx="4" cy="4" r="3" />
                 </svg>
-                ${displayContext.activityModel.activityId}
+                ${displayContext != undefined ? displayContext.activityModel.activityId : ''}
               </span>
             </div>
           </div>
@@ -858,6 +922,16 @@ export class ElsaWorkflowDesigner {
   render() {
     return (
       <Host class="workflow-canvas elsa-flex-1 elsa-flex" ref={el => (this.el = el)}>
+        {this.mode == WorkflowDesignerMode.Test ? 
+          <div>
+            <div id="left" style={{border:`4px solid orange`, position:`fixed`, zIndex:`10`, height: `calc(100vh - 64px)`, width:`4px`, top:`64`, bottom:`0`, left:`0`}}></div>
+            <div id="right" style={{border:`4px solid orange`, position:`fixed`, zIndex:`10`, height: `calc(100vh - 64px)`, width:`4px`, top:`64`, bottom:`0`, right:`0`}}></div>
+            <div id="top" style={{border:`4px solid orange`, position:`fixed`, zIndex:`10`, height:`4px`, left:`0`, right:`0`, top:`30`}}></div>
+            <div id="bottom" style={{border:`4px solid orange`, position:`fixed`, zIndex:`10`, height:`4px`, left:`0`, right:`0`, bottom:`0`}}></div>
+          </div>
+          :
+          undefined
+        }        
         <svg ref={(el: SVGSVGElement) => (this.svg = el)} id="svg" style={{
           height: 'calc(100vh - 64px)',
           width: '100%',
