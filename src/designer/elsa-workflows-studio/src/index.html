@@ -14,7 +14,7 @@
 </head>
 <body>
 
-<elsa-studio-root server-url="https://localhost:44391" monaco-lib-path="build/assets/js/monaco-editor/min" culture="en-US">
+<elsa-studio-root server-url="/workflow" monaco-lib-path="build/assets/js/monaco-editor/min" culture="en-US">
   <!-- The root dashboard component -->
   <coras-studio-dashboard></coras-studio-dashboard>
 
@@ -26,7 +26,7 @@
 <!-- Keep this to avoid Stencil from stripping classes added by dagre-d3 and dynamically computed classes <!-->
 <div class="node add label-container hidden elsa-border-blue-600 elsa-border-green-600 elsa-border-red-200 elsa-border-blue-200 elsa-border-green-200 elsa-border-red-200 elsa-bg-gray-600 elsa-bg-rose-600 elsa-bg-blue-600 elsa-bg-green-600 elsa-bg-red-600 elsa-bg-yellow-600"></div>
 
-<script type="module">
+<!-- <script type="module">
   // Integration demos.
 
   // Import publicly exposed services and models.
@@ -226,7 +226,7 @@
   elsaStudioRoot.addEventListener('workflow-changed', e => {
     console.log('Workflow model changed! New model: ${e.detail}');
   })
-</script>
+</script> -->
 
 </body>
 </html>
