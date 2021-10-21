@@ -299,7 +299,7 @@ namespace Elsa.Services.Workflows
                 }
                 catch (Exception e)
                 {
-                    await _mediator.Publish(new ActivityExecutionResultFailed(e, activityExecutionContext), cancellationToken);
+                    await _mediator.Publish(new ActivityExecutionFailed(e, activityExecutionContext), cancellationToken);
                     throw;
                 }
             }
