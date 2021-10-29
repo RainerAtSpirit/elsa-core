@@ -29,8 +29,10 @@ export class SwitchPlugin implements ElsaPlugin {
       const expression: any = casesProp.expressions[syntax] || [];
       const cases: Array<SwitchCase> = !!expression['$values'] ? expression['$values'] : Array.isArray(expression) ? expression : parseJson(expression) || [];
 
-      for(const c of cases)
-        outcomesHash[c.name] = true;
+      for(const c of cases){
+        var fixCaseIssueWithName: string = c.name || (c as any).Name;
+        outcomesHash[fixCaseIssueWithName] = true;
+      }
     }
 
     const outcomes = Object.keys(outcomesHash);

@@ -1,4 +1,4 @@
-import {Component, Event, EventEmitter, h, Host, Method, Prop, State, Watch} from '@stencil/core';
+import { Component, Event, EventEmitter, h, Host, Method, Prop, State, Watch } from '@stencil/core';
 import * as collection from 'lodash/collection';
 import moment from 'moment';
 import {
@@ -6,12 +6,14 @@ import {
   ActivityDescriptor,
   PagedList,
   WorkflowBlueprint,
-  WorkflowExecutionLogRecord, WorkflowInstance,
-  WorkflowModel, WorkflowStatus,
-} from "../../../../models";
-import {activityIconProvider} from "../../../../services/activity-icon-provider";
-import {createElsaClient} from "../../../../services/elsa-client";
-import {clip, durationToString} from "../../../../utils/utils";
+  WorkflowExecutionLogRecord,
+  WorkflowInstance,
+  WorkflowModel,
+  WorkflowStatus,
+} from '../../../../models';
+import { activityIconProvider } from '../../../../services/activity-icon-provider';
+import { createElsaClient } from '../../../../services/elsa-client';
+import { clip, durationToString } from '../../../../utils/utils';
 
 interface Tab {
   id: string;
@@ -24,7 +26,6 @@ interface Tab {
   shadow: false,
 })
 export class ElsaWorkflowInstanceJournal {
-
   @Prop() workflowInstanceId: string;
   @Prop() workflowInstance: WorkflowInstance;
   @Prop() serverUrl: string;
@@ -33,7 +34,7 @@ export class ElsaWorkflowInstanceJournal {
   @Prop() workflowModel: WorkflowModel;
   @Event() recordSelected: EventEmitter<WorkflowExecutionLogRecord>;
   @State() isVisible: boolean = true;
-  @State() records: PagedList<WorkflowExecutionLogRecord> = {items: [], totalCount: 0};
+  @State() records: PagedList<WorkflowExecutionLogRecord> = { items: [], totalCount: 0 };
   @State() filteredRecords: Array<WorkflowExecutionLogRecord> = [];
   @State() selectedRecordId?: string;
   @State() selectedActivityId?: string;
@@ -71,16 +72,16 @@ export class ElsaWorkflowInstanceJournal {
   selectActivityRecordInternal(record?: WorkflowExecutionLogRecord) {
     const activity = !!record ? this.workflowBlueprint.activities.find(x => x.id === record.activityId) : null;
     this.selectedRecordId = !!record ? record.id : null;
-    this.selectedActivityId = activity != null ? !!activity.parentId && activity.parentId != this.workflowBlueprint.id ? activity.parentId : activity.id : null;
+    this.selectedActivityId = activity != null ? (!!activity.parentId && activity.parentId != this.workflowBlueprint.id ? activity.parentId : activity.id) : null;
   }
 
   getEventColor(eventName: string) {
     const map = {
-      'Executing': 'blue',
-      'Executed': 'green',
-      'Faulted': 'rose',
-      'Warning': 'yellow',
-      'Information': 'blue',
+      Executing: 'blue',
+      Executed: 'green',
+      Faulted: 'rose',
+      Warning: 'yellow',
+      Information: 'blue',
     };
 
     return map[eventName] || 'gray';
@@ -113,23 +114,29 @@ export class ElsaWorkflowInstanceJournal {
     return (
       <Host>
         {this.renderPanel()}
-        <elsa-workflow-definition-editor-notifications/>
+        <elsa-workflow-definition-editor-notifications />
       </Host>
     );
   }
 
   renderPanel() {
     return (
-      <elsa-flyout-panel ref={el => this.flyoutPanel = el}>
-        <elsa-tab-header tab="general" slot="header">General</elsa-tab-header>
+      <elsa-flyout-panel ref={el => (this.flyoutPanel = el)}>
+        <elsa-tab-header tab="general" slot="header">
+          General
+        </elsa-tab-header>
         <elsa-tab-content tab="general" slot="content">
           {this.renderGeneralTab()}
         </elsa-tab-content>
-        <elsa-tab-header tab="journal" slot="header">Journal</elsa-tab-header>
+        <elsa-tab-header tab="journal" slot="header">
+          Journal
+        </elsa-tab-header>
         <elsa-tab-content tab="journal" slot="content">
           {this.renderJournalTab()}
         </elsa-tab-content>
-        <elsa-tab-header tab="activityState" slot="header">Activity State</elsa-tab-header>
+        <elsa-tab-header tab="activityState" slot="header">
+          Activity State
+        </elsa-tab-header>
         <elsa-tab-content tab="activityState" slot="content">
           {this.renderActivityStateTab()}
         </elsa-tab-content>
@@ -155,7 +162,7 @@ export class ElsaWorkflowInstanceJournal {
       const activityDescriptor = activityDescriptors.find(x => x.type === activityType);
       const activityBlueprint = activityBlueprints.find(x => x.id === record.activityId) || {
         name: null,
-        displayName: null
+        displayName: null,
       };
       const activityName = activityBlueprint.displayName || activityBlueprint.name || activityDescriptor.displayName || activityDescriptor.type;
       const eventName = record.eventName;
@@ -163,31 +170,23 @@ export class ElsaWorkflowInstanceJournal {
       const recordClass = record.id === selectedRecordId ? 'elsa-border-blue-600' : 'hover:elsa-bg-gray-100 elsa-border-transparent';
       const recordData = record.data || {};
       const filteredRecordData = {};
-      const wellKnownDataKeys = {State: true, Input: null, Outcomes: true, Exception: true};
+      const wellKnownDataKeys = { State: true, Input: null, Outcomes: true, Exception: true };
 
       for (const key in recordData) {
+        if (!recordData.hasOwnProperty(key)) continue;
 
-        if (!recordData.hasOwnProperty(key))
-          continue;
-
-        if (!!wellKnownDataKeys[key])
-          continue;
+        if (!!wellKnownDataKeys[key]) continue;
 
         const value = recordData[key];
 
-        if (!value && value != 0)
-          continue;
+        if (!value && value != 0) continue;
 
         let valueText = null;
 
-        if (typeof value == 'string')
-          valueText = value;
-        else if (typeof value == 'object')
-          valueText = JSON.stringify(value, null, 1);
-        else if (typeof value == 'undefined')
-          valueText = null;
-        else
-          valueText = value.toString();
+        if (typeof value == 'string') valueText = value;
+        else if (typeof value == 'object') valueText = JSON.stringify(value, null, 1);
+        else if (typeof value == 'undefined') valueText = null;
+        else valueText = value.toString();
 
         filteredRecordData[key] = valueText;
       }
@@ -203,42 +202,37 @@ export class ElsaWorkflowInstanceJournal {
               <strong class="elsa-block elsa-font-bold">{exception.Type}</strong>
               {exception.Message}
             </div>
-            {!!exception.InnerException ?
-              <div class="elsa-ml-4">{renderExceptionMessage(exception.InnerException)}</div> : undefined}
+            {!!exception.InnerException ? <div class="elsa-ml-4">{renderExceptionMessage(exception.InnerException)}</div> : undefined}
           </div>
         );
-      }
+      };
 
       return (
         <li>
-          <div onClick={() => this.onRecordClick(record)}
-               class={`${recordClass} elsa-border-2 elsa-cursor-pointer elsa-p-4 elsa-rounded`}>
+          <div onClick={() => this.onRecordClick(record)} class={`${recordClass} elsa-border-2 elsa-cursor-pointer elsa-p-4 elsa-rounded`}>
             <div class="elsa-relative elsa-pb-10">
-              {isLastItem ? undefined :
+              {isLastItem ? undefined : (
                 <div class="elsa-flex elsa-absolute top-8 elsa-left-4 -elsa-ml-px elsa-h-full elsa-w-0.5">
                   <div class="elsa-flex elsa-flex-1 elsa-items-center elsa-relative elsa-right-10">
-                    <span
-                      class="elsa-flex-1 elsa-text-sm elsa-text-gray-500 elsa-w-max elsa-bg-white elsa-p-1 elsa-rounded">{deltaTimeText}</span>
+                    <span class="elsa-flex-1 elsa-text-sm elsa-text-gray-500 elsa-w-max elsa-bg-white elsa-p-1 elsa-rounded">{deltaTimeText}</span>
                   </div>
-                </div>}
+                </div>
+              )}
               <div class="elsa-relative elsa-flex elsa-space-x-3">
                 <div>
                   <span
                     class="elsa-h-8 elsa-w-8 elsa-rounded-full elsa-bg-green-500 elsa-flex elsa-items-center elsa-justify-center elsa-ring-8 elsa-ring-white"
-                    innerHTML={activityIcon}/>
+                    innerHTML={activityIcon}
+                  />
                 </div>
                 <div class="elsa-min-w-0 elsa-flex-1 elsa-pt-1.5 elsa-flex elsa-justify-between elsa-space-x-4">
                   <div>
-                    <h3 class="elsa-text-lg elsa-leading-6 elsa-font-medium elsa-text-gray-900">
-                      {activityName}
-                    </h3>
+                    <h3 class="elsa-text-lg elsa-leading-6 elsa-font-medium elsa-text-gray-900">{activityName}</h3>
                   </div>
                   <div>
-                    <span
-                      class="elsa-relative elsa-inline-flex elsa-items-center elsa-rounded-full elsa-border elsa-border-gray-300 elsa-px-3 elsa-py-0.5 elsa-text-sm">
+                    <span class="elsa-relative elsa-inline-flex elsa-items-center elsa-rounded-full elsa-border elsa-border-gray-300 elsa-px-3 elsa-py-0.5 elsa-text-sm">
                       <span class="elsa-absolute elsa-flex-shrink-0 elsa-flex elsa-items-center elsa-justify-center">
-                        <span class={`elsa-h-1.5 elsa-w-1.5 elsa-rounded-full elsa-bg-${eventColor}-500`}
-                              aria-hidden="true"/>
+                        <span class={`elsa-h-1.5 elsa-w-1.5 elsa-rounded-full elsa-bg-${eventColor}-500`} aria-hidden="true" />
                       </span>
                       <span class="elsa-ml-3.5 elsa-font-medium elsa-text-gray-900">{eventName}</span>
                     </span>
@@ -254,7 +248,7 @@ export class ElsaWorkflowInstanceJournal {
                     <div class="sm:elsa-col-span-2">
                       <dt class="elsa-text-sm elsa-font-medium elsa-text-gray-500">
                         <span>Activity ID</span>
-                        <elsa-copy-button value={record.activityId}/>
+                        <elsa-copy-button value={record.activityId} />
                       </dt>
                       <dd class="elsa-mt-1 elsa-text-sm elsa-text-gray-900 elsa-mb-2">{record.activityId}</dd>
                     </div>
@@ -262,14 +256,15 @@ export class ElsaWorkflowInstanceJournal {
                       <div class="sm:elsa-col-span-2">
                         <dt class="elsa-text-sm elsa-font-medium elsa-text-gray-500">
                           <span>Outcomes</span>
-                          <elsa-copy-button value={outcomes.join(', ')}/>
+                          <elsa-copy-button value={outcomes.join(', ')} />
                         </dt>
                         <dd class="elsa-mt-1 elsa-text-sm elsa-text-gray-900 elsa-mb-2">
-                          <div
-                            class="elsa-flex elsa-flex-col elsa-space-y-4 sm:elsa-space-y-0 sm:elsa-flex-row sm:elsa-space-x-4">
+                          <div class="elsa-flex elsa-flex-col elsa-space-y-4 sm:elsa-space-y-0 sm:elsa-flex-row sm:elsa-space-x-4">
                             {outcomes.map(outcome => (
-                              <span
-                                class="elsa-inline-flex elsa-items-center elsa-px-3 elsa-py-0.5 elsa-rounded-full elsa-text-sm elsa-font-medium elsa-bg-blue-100 elsa-text-blue-800">{outcome}</span>))}
+                              <span class="elsa-inline-flex elsa-items-center elsa-px-3 elsa-py-0.5 elsa-rounded-full elsa-text-sm elsa-font-medium elsa-bg-blue-100 elsa-text-blue-800">
+                                {outcome}
+                              </span>
+                            ))}
                           </div>
                         </dd>
                       </div>
@@ -278,38 +273,36 @@ export class ElsaWorkflowInstanceJournal {
                       <div class="sm:elsa-col-span-2">
                         <dt class="elsa-text-sm elsa-font-medium elsa-text-gray-500">
                           <span>Message</span>
-                          <elsa-copy-button value={record.message}/>
+                          <elsa-copy-button value={record.message} />
                         </dt>
-                        <dd class="elsa-mt-1 elsa-text-sm elsa-text-gray-900">
-                          {record.message}
-                        </dd>
+                        <dd class="elsa-mt-1 elsa-text-sm elsa-text-gray-900">{record.message}</dd>
                       </div>
                     ) : undefined}
-                    {!!exception ? (
-                      [<div class="sm:elsa-col-span-2">
-                        <dt class="elsa-text-sm elsa-font-medium elsa-text-gray-500">
-                          <span>Exception</span>
-                          <elsa-copy-button value={exception.Type + '\n' + exception.Message}/>
-                        </dt>
-                        <dd class="elsa-mt-1 elsa-text-sm elsa-text-gray-900">
-                          {renderExceptionMessage(exception)}
-                        </dd>
-                      </div>,
-                        <div class="sm:elsa-col-span-2">
-                          <dt class="elsa-text-sm elsa-font-medium elsa-text-gray-500">
-                            <span>Exception Details</span>
-                            <elsa-copy-button value={JSON.stringify(exception, null, 1)}/>
-                          </dt>
-                          <dd class="elsa-mt-1 elsa-text-sm elsa-text-gray-900 elsa-overflow-x-auto">
-                            <pre onClick={e => clip(e.currentTarget)}>{JSON.stringify(exception, null, 1)}</pre>
-                          </dd>
-                        </div>]
-                    ) : undefined}
+                    {!!exception
+                      ? [
+                          <div class="sm:elsa-col-span-2">
+                            <dt class="elsa-text-sm elsa-font-medium elsa-text-gray-500">
+                              <span>Exception</span>
+                              <elsa-copy-button value={exception.Type + '\n' + exception.Message} />
+                            </dt>
+                            <dd class="elsa-mt-1 elsa-text-sm elsa-text-gray-900">{renderExceptionMessage(exception)}</dd>
+                          </div>,
+                          <div class="sm:elsa-col-span-2">
+                            <dt class="elsa-text-sm elsa-font-medium elsa-text-gray-500">
+                              <span>Exception Details</span>
+                              <elsa-copy-button value={JSON.stringify(exception, null, 1)} />
+                            </dt>
+                            <dd class="elsa-mt-1 elsa-text-sm elsa-text-gray-900 elsa-overflow-x-auto">
+                              <pre onClick={e => clip(e.currentTarget)}>{JSON.stringify(exception, null, 1)}</pre>
+                            </dd>
+                          </div>,
+                        ]
+                      : undefined}
                     {collection.map(filteredRecordData, (v, k) => (
                       <div class="sm:elsa-col-span-2">
                         <dt class="elsa-text-sm elsa-font-medium elsa-text-gray-500 elsa-capitalize">
                           <span>{k}</span>
-                          <elsa-copy-button value={v}/>
+                          <elsa-copy-button value={v} />
                         </dt>
                         <dd class="elsa-mt-1 elsa-text-sm elsa-text-gray-900 elsa-mb-2 elsa-overflow-x-auto">
                           <pre onClick={e => clip(e.currentTarget)}>{v}</pre>
@@ -327,22 +320,18 @@ export class ElsaWorkflowInstanceJournal {
 
     return (
       <div class="flow-root elsa-mt-4">
-        <ul class="-elsa-mb-8">
-          {items.map(renderRecord)}
-        </ul>
+        <ul class="-elsa-mb-8">{items.map(renderRecord)}</ul>
       </div>
     );
   };
 
   renderActivityStateTab = () => {
-
     const activityModel = !!this.workflowModel && this.selectedActivityId ? this.workflowModel.activities.find(x => x.activityId === this.selectedActivityId) : null;
 
-    if (!activityModel)
-      return <p>No activity selected</p>;
+    if (!activityModel) return <p>No activity selected</p>;
 
     // Hide expressions field from properties so that we only display the evaluated value.
-    const model = {...activityModel, properties: activityModel.properties.map(x => ({name: x.name, value: x.value}))}
+    const model = { ...activityModel, properties: activityModel.properties.map(x => ({ name: x.name, value: x.value })) };
 
     return (
       <div class="elsa-mt-4">
@@ -352,8 +341,8 @@ export class ElsaWorkflowInstanceJournal {
   };
 
   renderGeneralTab = () => {
-    const {workflowInstance, workflowBlueprint} = this;
-    const {finishedAt, lastExecutedAt, faultedAt} = workflowInstance;
+    const { workflowInstance, workflowBlueprint } = this;
+    const { finishedAt, lastExecutedAt, faultedAt, variables } = workflowInstance;
     const format = 'DD-MM-YYYY HH:mm:ss';
     const eventColor = this.getStatusColor(workflowInstance.workflowStatus);
 
@@ -384,8 +373,7 @@ export class ElsaWorkflowInstanceJournal {
           <dd class="elsa-text-gray-900 elsa-break-all">
             <span class="elsa-relative elsa-inline-flex elsa-items-center elsa-rounded-full">
               <span class="elsa-flex-shrink-0 elsa-flex elsa-items-center elsa-justify-center">
-                <span class={`elsa-w-2-5 elsa-h-2-5 elsa-rounded-full elsa-bg-${eventColor}-500`}
-                      aria-hidden="true"/>
+                <span class={`elsa-w-2-5 elsa-h-2-5 elsa-rounded-full elsa-bg-${eventColor}-500`} aria-hidden="true" />
               </span>
               <span class="elsa-ml-3.5">{workflowInstance.workflowStatus || '-'}</span>
             </span>
@@ -401,14 +389,19 @@ export class ElsaWorkflowInstanceJournal {
         </div>
         <div class="elsa-py-3 elsa-flex elsa-justify-between elsa-text-sm elsa-font-medium">
           <dt class="elsa-text-gray-500">Last Executed</dt>
-          <dd
-            class="elsa-text-gray-900 elsa-break-all">{lastExecutedAt ? moment(lastExecutedAt).format(format) : '-'}</dd>
+          <dd class="elsa-text-gray-900 elsa-break-all">{lastExecutedAt ? moment(lastExecutedAt).format(format) : '-'}</dd>
         </div>
         <div class="elsa-py-3 elsa-flex elsa-justify-between elsa-text-sm elsa-font-medium">
           <dt class="elsa-text-gray-500">Faulted</dt>
           <dd class="elsa-text-gray-900 elsa-break-all">{faultedAt ? moment(faultedAt).format(format) : '-'}</dd>
         </div>
+        <div class="elsa-py-3 elsa-text-sm elsa-font-medium">
+          <div class="elsa-text-gray-500">Variables:</div>
+          <div class="elsa-text-sm elsa-font-medium">
+          {variables?.data ? <pre>{JSON.stringify(variables?.data, null, 2)}</pre> : '-'}
+          </div>
+        </div>
       </dl>
-    )
+    );
   };
 }
