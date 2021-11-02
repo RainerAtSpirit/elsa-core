@@ -140,6 +140,12 @@ export class ElsaWorkflowInstanceJournal {
         <elsa-tab-content tab="activityState" slot="content">
           {this.renderActivityStateTab()}
         </elsa-tab-content>
+        <elsa-tab-header tab="variables" slot="header">
+          Variables
+        </elsa-tab-header>
+        <elsa-tab-content tab="variables" slot="content">
+          {this.renderVariablesTab()}
+        </elsa-tab-content>
       </elsa-flyout-panel>
     );
   }
@@ -342,7 +348,7 @@ export class ElsaWorkflowInstanceJournal {
 
   renderGeneralTab = () => {
     const { workflowInstance, workflowBlueprint } = this;
-    const { finishedAt, lastExecutedAt, faultedAt, variables } = workflowInstance;
+    const { finishedAt, lastExecutedAt, faultedAt } = workflowInstance;
     const format = 'DD-MM-YYYY HH:mm:ss';
     const eventColor = this.getStatusColor(workflowInstance.workflowStatus);
 
@@ -395,12 +401,20 @@ export class ElsaWorkflowInstanceJournal {
           <dt class="elsa-text-gray-500">Faulted</dt>
           <dd class="elsa-text-gray-900 elsa-break-all">{faultedAt ? moment(faultedAt).format(format) : '-'}</dd>
         </div>
+      </dl>
+    );
+  };
+
+  renderVariablesTab = () => {
+    const { workflowInstance, workflowBlueprint } = this;
+    const { variables } = workflowInstance;
+    const eventColor = this.getStatusColor(workflowInstance.workflowStatus);
+
+    return (
+      <dl class="elsa-border-b elsa-border-gray-200 elsa-divide-y elsa-divide-gray-200">
         <div class="elsa-py-3 elsa-text-sm elsa-font-medium">
-          <div class="elsa-text-gray-500">Variables:</div>
-          <div class="elsa-text-sm elsa-font-medium">
           {variables?.data ? <pre>{JSON.stringify(variables?.data, null, 2)}</pre> : '-'}
           </div>
-        </div>
       </dl>
     );
   };
