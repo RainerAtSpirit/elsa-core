@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Elsa.Models;
 using Elsa.Persistence;
 using Elsa.Persistence.Specifications;
 using Elsa.Persistence.Specifications.WorkflowExecutionLogRecords;
@@ -50,14 +51,18 @@ namespace Elsa.Scripting.JavaScript.Handlers
             engine.SetValue("parseGuid", (Func<string, Guid>)(Guid.Parse));
             engine.SetValue("setVariable", (Action<string, object>)((name, value) => activityExecutionContext.SetVariable(name, value)));
             engine.SetValue("getVariable", (Func<string, object?>)(name => activityExecutionContext.GetVariable(name)));
+            engine.SetValue("getTransientVariable", (Func<string, object?>)(name => activityExecutionContext.GetTransientVariable(name)));
             engine.SetValue("isNullOrWhiteSpace", (Func<string, bool>)(string.IsNullOrWhiteSpace));
             engine.SetValue("isNullOrEmpty", (Func<string, bool>)(string.IsNullOrEmpty));
             engine.SetValue("getWorkflowDefinitionIdByName", (Func<string, string?>)(name => GetWorkflowDefinitionIdByName(activityExecutionContext, name)));
             engine.SetValue("getWorkflowDefinitionIdByTag", (Func<string, string?>)(tag => GetWorkflowDefinitionIdByTag(activityExecutionContext, tag)));
             engine.SetValue("getActivity", (Func<string, object?>)(idOrName => GetActivityModel(activityExecutionContext, idOrName)));
+            engine.SetValue("getActivityId", (Func<string, string?>)(activityName => GetActivityId(activityExecutionContext, activityName)));
             engine.SetValue("findExecutedActivityIdByType", (Func<string, string?>)(activityTypeName => FindExecutedActivityByTypeAsync(activityExecutionContext, activityTypeName, cancellationToken).Result));
             engine.SetValue("jsonEncode", (Func<object, string>)(JsonConvert.SerializeObject));
             engine.SetValue("jsonDecode", (Func<string, object?>)JsonConvert.DeserializeObject);
+            engine.SetValue("base64Encode", (Func<string, string>)Extensions.StringExtensions.ToBase64);
+            engine.SetValue("base64Decode", (Func<string, string>)Extensions.StringExtensions.FromBase64);
 
             if (_scriptOptions.EnableConfigurationAccess)
                 engine.SetValue("getConfig", (Func<string, object?>)(name => _configuration.GetSection(name).Value));
@@ -144,15 +149,17 @@ namespace Elsa.Scripting.JavaScript.Handlers
             }
         }
 
-        private string? GetWorkflowDefinitionIdByTag(ActivityExecutionContext activityExecutionContext, string tag) => GetWorkflowDefinitionId(activityExecutionContext, x => string.Equals(x.Tag, tag, StringComparison.OrdinalIgnoreCase));
-
-        private string? GetWorkflowDefinitionIdByName(ActivityExecutionContext activityExecutionContext, string name) =>
-            GetWorkflowDefinitionId(activityExecutionContext, x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
-
-        private string? GetWorkflowDefinitionId(ActivityExecutionContext activityExecutionContext, Func<IWorkflowBlueprint, bool> filter)
+        private string? GetWorkflowDefinitionIdByTag(ActivityExecutionContext activityExecutionContext, string tag)
         {
             var workflowRegistry = activityExecutionContext.GetService<IWorkflowRegistry>();
-            var workflowBlueprint = workflowRegistry.FindAsync(filter).Result;
+            var workflowBlueprint = workflowRegistry.FindByTagAsync(tag, VersionOptions.Published).Result;
+            return workflowBlueprint?.Id;
+        }
+
+        private string? GetWorkflowDefinitionIdByName(ActivityExecutionContext activityExecutionContext, string name)
+        {
+            var workflowRegistry = activityExecutionContext.GetService<IWorkflowRegistry>();
+            var workflowBlueprint = workflowRegistry.FindByNameAsync(name, VersionOptions.Published).Result;
             return workflowBlueprint?.Id;
         }
 
@@ -161,6 +168,13 @@ namespace Elsa.Scripting.JavaScript.Handlers
             var workflowExecutionContext = context.WorkflowExecutionContext;
             var activity = workflowExecutionContext.GetActivityBlueprintByName(idOrName) ?? workflowExecutionContext.GetActivityBlueprintById(idOrName);
             return activity == null ? null : workflowExecutionContext.WorkflowInstance.ActivityData[activity.Id];
+        }
+
+        private string? GetActivityId(ActivityExecutionContext context, string activityName)
+        {
+            var workflowExecutionContext = context.WorkflowExecutionContext;
+            var activity = workflowExecutionContext.GetActivityBlueprintByName(activityName);
+            return activity?.Id;
         }
 
         private async Task<object?> GetActivityPropertyAsync(string activityIdOrName, string propertyName, ActivityExecutionContext context)

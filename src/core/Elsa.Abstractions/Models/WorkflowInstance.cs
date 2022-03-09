@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Elsa.Comparers;
 using Elsa.Services.Models;
 using NodaTime;
@@ -18,8 +17,10 @@ namespace Elsa.Models
         }
 
         public string DefinitionId { get; set; } = default!;
+        public string DefinitionVersionId { get; set; } = default!;
         public string? TenantId { get; set; }
         public int Version { get; set; }
+        
         public WorkflowStatus WorkflowStatus { get; set; }
         public string CorrelationId { get; set; } = default!;
         public string? ContextType { get; set; }

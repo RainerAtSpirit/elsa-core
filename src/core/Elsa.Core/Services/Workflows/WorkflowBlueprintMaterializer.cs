@@ -46,6 +46,7 @@ namespace Elsa.Services.Workflows
             var workflowBlueprint = new WorkflowBlueprint(
                 workflowDefinition.DefinitionId,
                 workflowDefinition.Version,
+                workflowDefinition.VersionId,
                 workflowDefinition.TenantId,
                 workflowDefinition.IsSingleton,
                 workflowDefinition.Name,
@@ -65,7 +66,8 @@ namespace Elsa.Services.Workflows
                 new ActivityPropertyProviders(propertyProviders.ToDictionary(x => x.Key, x => x.Value))
             );
 
-            foreach (var compositeActivityBlueprint in compositeActivityBlueprints) 
+            // For those composite activities that do not have a parent, assign the workflow to be their parent. 
+            foreach (var compositeActivityBlueprint in compositeActivityBlueprints.Where(x => x.Parent == null)) 
                 ((CompositeActivityBlueprint) compositeActivityBlueprint).Parent = workflowBlueprint;
 
             return workflowBlueprint;

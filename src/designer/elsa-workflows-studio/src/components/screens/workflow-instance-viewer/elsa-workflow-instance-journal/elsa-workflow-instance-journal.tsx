@@ -152,25 +152,31 @@ export class ElsaWorkflowInstanceJournal {
 
   renderJournalTab = () => {
     const items = this.filteredRecords;
+    const allItems = this.records.items;
     const activityDescriptors = this.activityDescriptors;
     const workflowBlueprint = this.workflowBlueprint;
     const activityBlueprints: Array<ActivityBlueprint> = workflowBlueprint.activities || [];
     const selectedRecordId = this.selectedRecordId;
 
     const renderRecord = (record: WorkflowExecutionLogRecord, index: number) => {
-      const isLastItem = index == items.length - 1;
-      const nextItem = isLastItem ? null : items[index + 1];
+      const prevItem = allItems[allItems.indexOf(items[index]) - 1];
       const currentTimestamp = moment(record.timestamp);
-      const nextTimestamp = isLastItem ? null : moment(nextItem.timestamp);
-      const deltaTime = isLastItem ? null : moment.duration(nextTimestamp.diff(currentTimestamp));
+      const prevTimestamp = moment(prevItem.timestamp);
+      const deltaTime = moment.duration(currentTimestamp.diff(prevTimestamp));
       const activityType = record.activityType;
       const activityIcon = activityIconProvider.getIcon(activityType);
-      const activityDescriptor = activityDescriptors.find(x => x.type === activityType);
+
+      const activityDescriptor = activityDescriptors.find(x => x.type === activityType) || {
+        displayName: null,
+        type: null
+      };
+
       const activityBlueprint = activityBlueprints.find(x => x.id === record.activityId) || {
         name: null,
         displayName: null,
       };
-      const activityName = activityBlueprint.displayName || activityBlueprint.name || activityDescriptor.displayName || activityDescriptor.type;
+
+      const activityName = activityBlueprint.displayName || activityBlueprint.name || activityDescriptor.displayName || activityDescriptor.type || '(Not Found): ' + activityType;
       const eventName = record.eventName;
       const eventColor = this.getEventColor(eventName);
       const recordClass = record.id === selectedRecordId ? 'elsa-border-blue-600' : 'hover:elsa-bg-gray-100 elsa-border-transparent';
@@ -217,19 +223,17 @@ export class ElsaWorkflowInstanceJournal {
         <li>
           <div onClick={() => this.onRecordClick(record)} class={`${recordClass} elsa-border-2 elsa-cursor-pointer elsa-p-4 elsa-rounded`}>
             <div class="elsa-relative elsa-pb-10">
-              {isLastItem ? undefined : (
-                <div class="elsa-flex elsa-absolute top-8 elsa-left-4 -elsa-ml-px elsa-h-full elsa-w-0.5">
-                  <div class="elsa-flex elsa-flex-1 elsa-items-center elsa-relative elsa-right-10">
-                    <span class="elsa-flex-1 elsa-text-sm elsa-text-gray-500 elsa-w-max elsa-bg-white elsa-p-1 elsa-rounded">{deltaTimeText}</span>
-                  </div>
+              <div class="elsa-flex elsa-absolute top-8 elsa-left-4 -elsa-ml-px elsa-h-full elsa-w-0.5">
+                <div class="elsa-flex elsa-flex-1 elsa-items-center elsa-relative elsa-right-10">
+                  <span
+                    class="elsa-flex-1 elsa-text-sm elsa-text-gray-500 elsa-w-max elsa-bg-white elsa-p-1 elsa-ml-1 elsa-rounded-r">{deltaTimeText}</span>
                 </div>
-              )}
+              </div>
               <div class="elsa-relative elsa-flex elsa-space-x-3">
                 <div>
                   <span
-                    class="elsa-h-8 elsa-w-8 elsa-rounded-full elsa-bg-green-500 elsa-flex elsa-items-center elsa-justify-center elsa-ring-8 elsa-ring-white"
-                    innerHTML={activityIcon}
-                  />
+                    class="elsa-h-8 elsa-w-8 elsa-rounded-full elsa-bg-green-500 elsa-flex elsa-items-center elsa-justify-center elsa-ring-8 elsa-ring-white elsa-mr-1"
+                    innerHTML={activityIcon}/>
                 </div>
                 <div class="elsa-min-w-0 elsa-flex-1 elsa-pt-1.5 elsa-flex elsa-justify-between elsa-space-x-4">
                   <div>
@@ -334,7 +338,8 @@ export class ElsaWorkflowInstanceJournal {
   renderActivityStateTab = () => {
     const activityModel = !!this.workflowModel && this.selectedActivityId ? this.workflowModel.activities.find(x => x.activityId === this.selectedActivityId) : null;
 
-    if (!activityModel) return <p>No activity selected</p>;
+    if (!activityModel)
+      return <p class="elsa-mt-4">No activity selected</p>;
 
     // Hide expressions field from properties so that we only display the evaluated value.
     const model = { ...activityModel, properties: activityModel.properties.map(x => ({ name: x.name, value: x.value })) };
@@ -418,4 +423,5 @@ export class ElsaWorkflowInstanceJournal {
       </dl>
     );
   };
+
 }

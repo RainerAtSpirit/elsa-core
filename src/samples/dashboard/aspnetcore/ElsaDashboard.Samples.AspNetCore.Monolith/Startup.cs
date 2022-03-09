@@ -1,6 +1,8 @@
 using Elsa;
+using Elsa.Activities.UserTask.Extensions;
 using Elsa.Persistence.EntityFramework.Core.Extensions;
 using Elsa.Persistence.EntityFramework.Sqlite;
+using Elsa.WorkflowTesting.Api.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +25,7 @@ namespace ElsaDashboard.Samples.AspNetCore.Monolith
         {
             services.AddRazorPages();
 
-            // Elsa Server.
+            // Elsa Server settings.
             var elsaSection = Configuration.GetSection("Elsa");
             
             services
@@ -34,6 +36,7 @@ namespace ElsaDashboard.Samples.AspNetCore.Monolith
                     .AddEmailActivities(elsaSection.GetSection("Smtp").Bind)
                     .AddQuartzTemporalActivities()
                     .AddJavaScriptActivities()
+                    .AddUserTaskActivities()
                     .AddActivitiesFrom<Startup>()
                     .AddFeatures(new[] { typeof(Startup) }, Configuration)
                     .WithContainerName(elsaSection.GetSection("Server:ContainerName").Get<string>())
@@ -41,7 +44,8 @@ namespace ElsaDashboard.Samples.AspNetCore.Monolith
 
             services
                 .AddElsaSwagger()
-                .AddElsaApiEndpoints();
+                .AddElsaApiEndpoints()
+                .AddWorkflowTestingServices();
 
             // Allow arbitrary client browser apps to access the API.
             // In a production environment, make sure to allow only origins you trust.
@@ -70,6 +74,9 @@ namespace ElsaDashboard.Samples.AspNetCore.Monolith
             app.UseHttpActivities();
             app.UseEndpoints(endpoints =>
             {
+                // Maps a SignalR hub for the designer to connect to when testing workflows.
+                endpoints.MapWorkflowTestHub();
+                
                 // Elsa Server uses ASP.NET Core Controllers.
                 endpoints.MapControllers();
 

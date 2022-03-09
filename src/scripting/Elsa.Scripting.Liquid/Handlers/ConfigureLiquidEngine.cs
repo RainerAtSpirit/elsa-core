@@ -10,6 +10,7 @@ using Elsa.Providers.WorkflowStorage;
 using Elsa.Scripting.Liquid.Helpers;
 using Elsa.Scripting.Liquid.Messages;
 using Elsa.Scripting.Liquid.Options;
+using Elsa.Services;
 using Elsa.Services.Models;
 using Elsa.Services.WorkflowStorage;
 using Fluid;
@@ -26,12 +27,14 @@ namespace Elsa.Scripting.Liquid.Handlers
         private readonly IConfiguration _configuration;
         private readonly IWorkflowStorageService _workflowStorageService;
         private readonly LiquidOptions _liquidOptions;
+        private readonly IActivityTypeService _activityTypeService;
 
-        public ConfigureLiquidEngine(IConfiguration configuration, IWorkflowStorageService workflowStorageService, IOptions<LiquidOptions> liquidOptions)
+        public ConfigureLiquidEngine(IConfiguration configuration, IWorkflowStorageService workflowStorageService, IOptions<LiquidOptions> liquidOptions, IActivityTypeService activityTypeService)
         {
             _configuration = configuration;
             _workflowStorageService = workflowStorageService;
             _liquidOptions = liquidOptions.Value;
+            _activityTypeService = activityTypeService;
         }
 
         public Task Handle(EvaluatingLiquidExpression notification, CancellationToken cancellationToken)
@@ -42,6 +45,7 @@ namespace Elsa.Scripting.Liquid.Handlers
 
             options.ValueConverters.Add(x => x is JObject o ? new ObjectValue(o) : null);
             options.ValueConverters.Add(x => x is JValue v ? v.Value : null);
+            options.ValueConverters.Add(x => x is ExpandoObject e ? new ObjectValue(e) : null);
 
             memberAccessStrategy.Register<ExpandoObject>();
             memberAccessStrategy.Register<JObject>();
@@ -58,10 +62,10 @@ namespace Elsa.Scripting.Liquid.Handlers
             memberAccessStrategy.Register<ActivityExecutionContext, FluidValue>("WorkflowDefinitionVersion", x => ToFluidValue(x.WorkflowInstance.Version, options));
             memberAccessStrategy.Register<ActivityExecutionContext, LiquidPropertyAccessor>("Variables", x => new LiquidPropertyAccessor(name => ToFluidValue(x.WorkflowExecutionContext.GetMergedVariables(), name, options)));
             memberAccessStrategy.Register<ActivityExecutionContext, LiquidPropertyAccessor>("Activities", x => new LiquidPropertyAccessor(name => ToFluidValue(GetActivityModel(x, name), options)!));
-            memberAccessStrategy.Register<ActivityExecutionContext, LiquidActivityModel>((x, a) => GetActivityModel(x, a));
+            memberAccessStrategy.Register<ActivityExecutionContext, LiquidActivityModel>(GetActivityModel);
             memberAccessStrategy.Register<LiquidActivityModel, object?>((model, name) => GetActivityProperty(model, name, cancellationToken));
             memberAccessStrategy.Register<LiquidObjectAccessor<JObject>, JObject>((x, name) => x.GetValueAsync(name));
-            memberAccessStrategy.Register<ExpandoObject, object>((x, name) => ((IDictionary<string, object>) x)[name]);
+            memberAccessStrategy.Register<ExpandoObject, object>((x, name) => ((IDictionary<string, object>)x)[name]);
             memberAccessStrategy.Register<JObject, object?>((source, name) => source.GetValue(name, StringComparison.OrdinalIgnoreCase));
 
             if (_liquidOptions.EnableConfigurationAccess)
@@ -94,7 +98,14 @@ namespace Elsa.Scripting.Liquid.Handlers
             var workflowExecutionContext = activityExecutionContext.WorkflowExecutionContext;
             var activityBlueprint = activityModel.ActivityId != null ? workflowExecutionContext.GetActivityBlueprintById(activityModel.ActivityId)! : workflowExecutionContext.GetActivityBlueprintByName(activityModel.ActivityName!)!;
             var activityId = activityBlueprint.Id;
-            var storageProviderName = activityBlueprint.PropertyStorageProviders.GetItem(name);
+
+            var activityType = await _activityTypeService.GetActivityTypeAsync(activityBlueprint.Type, cancellationToken);
+            var activityDescriptor = await _activityTypeService.DescribeActivityType(activityType, cancellationToken);
+
+            var property = activityDescriptor.OutputProperties.FirstOrDefault(d => d.Name == name);
+
+            var storageProviderName = activityBlueprint.PropertyStorageProviders.GetItem(name) ?? property?.DefaultWorkflowStorageProvider;
+
             var storageContext = new WorkflowStorageContext(workflowExecutionContext.WorkflowInstance, activityId);
             var value = await _workflowStorageService.LoadAsync(storageProviderName, storageContext, name, cancellationToken);
             return value;

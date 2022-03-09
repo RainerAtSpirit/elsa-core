@@ -5,11 +5,11 @@ using Elsa.Activities.Http.Bookmarks;
 using Elsa.Activities.Http.JavaScript;
 using Elsa.Activities.Http.Liquid;
 using Elsa.Activities.Http.Options;
-using Elsa.Activities.Http.Parsers;
 using Elsa.Activities.Http.Parsers.Request;
 using Elsa.Activities.Http.Parsers.Response;
 using Elsa.Activities.Http.Services;
 using Elsa.Options;
+using Elsa.Scripting.JavaScript.Providers;
 using Elsa.Scripting.Liquid.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -53,11 +53,13 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddSingleton<IAbsoluteUrlProvider, DefaultAbsoluteUrlProvider>()
                 .AddSingleton<AllowAnonymousHttpEndpointAuthorizationHandler>()
                 .AddSingleton(sp => sp.GetRequiredService<IOptions<HttpActivityOptions>>().Value.HttpEndpointAuthorizationHandlerFactory(sp))
+                .AddSingleton(sp => sp.GetRequiredService<IOptions<HttpActivityOptions>>().Value.HttpEndpointWorkflowFaultHandlerFactory(sp))
                 .AddBookmarkProvider<HttpEndpointBookmarkProvider>()
                 .AddHttpContextAccessor()
                 .AddNotificationHandlers(typeof(ConfigureJavaScriptEngine))
                 .AddLiquidFilter<SignalUrlFilter>("signal_url")
                 .AddJavaScriptTypeDefinitionProvider<HttpTypeDefinitionProvider>()
+                .AddSingleton<IActivityTypeDefinitionRenderer, HttpEndpointTypeDefinitionRenderer>()
                 .AddDataProtection();
 
             return services;

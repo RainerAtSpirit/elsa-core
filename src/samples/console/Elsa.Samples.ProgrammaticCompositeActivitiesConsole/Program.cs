@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Elsa.Samples.ProgrammaticCompositeActivitiesConsole.Activities;
 using Elsa.Samples.ProgrammaticCompositeActivitiesConsole.Workflows;
 using Elsa.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,9 +15,8 @@ namespace Elsa.Samples.ProgrammaticCompositeActivitiesConsole
                 .AddLogging(logging => logging.AddConsole().SetMinimumLevel(LogLevel.Warning))
                 .AddElsa(options => options
                     .AddConsoleActivities()
-                    .AddActivity<NavigateActivity>()
-                    .AddActivity<CountdownActivity>()
-                    .AddWorkflow<CompositionWorkflow>())
+                    .AddActivitiesFrom<Program>()
+                    .AddWorkflowsFrom<Program>())
                 .BuildServiceProvider();
 
             // Run startup actions (not needed when registering Elsa with a Host).

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Elsa.Activities.Http.Models;
 using Elsa.Activities.Http.Providers.DefaultValues;
@@ -41,7 +40,7 @@ namespace Elsa.Activities.Http
             DefaultSyntax = SyntaxNames.Json,
             SupportedSyntaxes = new[] { SyntaxNames.Json, SyntaxNames.JavaScript, SyntaxNames.Liquid })]
 
-        public HashSet<string> Methods { get; set; } = new HashSet<string> { "GET" };
+        public HashSet<string> Methods { get; set; } = new() { "GET" };
 
         /// <summary>
         /// A value indicating whether the HTTP request content body should be read and stored as part of the HTTP request model.
