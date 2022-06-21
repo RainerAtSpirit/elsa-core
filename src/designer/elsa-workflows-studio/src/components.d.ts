@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { ActivityDefinitionProperty, ActivityDescriptor, ActivityModel, ActivityPropertyDescriptor, ElsaStudio, IntellisenseContext, OrderBy, SelectListItem, VersionOptions, WorkflowBlueprint, WorkflowDefinition, WorkflowExecutionLogRecord, WorkflowFault, WorkflowInstance, WorkflowModel, WorkflowStatus } from "./models";
+import { ActivityDefinitionProperty, ActivityDescriptor, ActivityModel, ActivityPropertyDescriptor, ElsaStudio, IntellisenseContext, OrderBy, SelectListItem, VersionOptions, WorkflowBlueprint, WorkflowDefinition, WorkflowDefinitionVersion, WorkflowExecutionLogRecord, WorkflowFault, WorkflowInstance, WorkflowModel, WorkflowStatus } from "./models";
 import { LocationSegments, MatchResults, RouterHistory } from "@stencil/router";
 import { MenuItem } from "./components/controls/elsa-context-menu/models";
 import { VNode } from "@stencil/core";
@@ -55,6 +55,11 @@ export namespace Components {
     }
     interface ElsaCopyButton {
         "value": string;
+    }
+    interface ElsaCronExpressionProperty {
+        "activityModel": ActivityModel;
+        "propertyDescriptor": ActivityPropertyDescriptor;
+        "propertyModel": ActivityDefinitionProperty;
     }
     interface ElsaDesignerPanel {
         "culture": string;
@@ -262,6 +267,10 @@ export namespace Components {
         "hide": () => Promise<void>;
         "show": (options: ToastNotificationOptions) => Promise<void>;
     }
+    interface ElsaVersionHistoryPanel {
+        "serverUrl": string;
+        "workflowDefinition": WorkflowDefinition;
+    }
     interface ElsaWebhookDefinitionEditorNotifications {
     }
     interface ElsaWebhookDefinitionEditorScreen {
@@ -433,6 +442,12 @@ declare global {
     var HTMLElsaCopyButtonElement: {
         prototype: HTMLElsaCopyButtonElement;
         new (): HTMLElsaCopyButtonElement;
+    };
+    interface HTMLElsaCronExpressionPropertyElement extends Components.ElsaCronExpressionProperty, HTMLStencilElement {
+    }
+    var HTMLElsaCronExpressionPropertyElement: {
+        prototype: HTMLElsaCronExpressionPropertyElement;
+        new (): HTMLElsaCronExpressionPropertyElement;
     };
     interface HTMLElsaDesignerPanelElement extends Components.ElsaDesignerPanel, HTMLStencilElement {
     }
@@ -644,6 +659,12 @@ declare global {
         prototype: HTMLElsaToastNotificationElement;
         new (): HTMLElsaToastNotificationElement;
     };
+    interface HTMLElsaVersionHistoryPanelElement extends Components.ElsaVersionHistoryPanel, HTMLStencilElement {
+    }
+    var HTMLElsaVersionHistoryPanelElement: {
+        prototype: HTMLElsaVersionHistoryPanelElement;
+        new (): HTMLElsaVersionHistoryPanelElement;
+    };
     interface HTMLElsaWebhookDefinitionEditorNotificationsElement extends Components.ElsaWebhookDefinitionEditorNotifications, HTMLStencilElement {
     }
     var HTMLElsaWebhookDefinitionEditorNotificationsElement: {
@@ -763,6 +784,7 @@ declare global {
         "elsa-context-menu": HTMLElsaContextMenuElement;
         "elsa-control": HTMLElsaControlElement;
         "elsa-copy-button": HTMLElsaCopyButtonElement;
+        "elsa-cron-expression-property": HTMLElsaCronExpressionPropertyElement;
         "elsa-designer-panel": HTMLElsaDesignerPanelElement;
         "elsa-designer-tree": HTMLElsaDesignerTreeElement;
         "elsa-dictionary-property": HTMLElsaDictionaryPropertyElement;
@@ -798,6 +820,7 @@ declare global {
         "elsa-tab-content": HTMLElsaTabContentElement;
         "elsa-tab-header": HTMLElsaTabHeaderElement;
         "elsa-toast-notification": HTMLElsaToastNotificationElement;
+        "elsa-version-history-panel": HTMLElsaVersionHistoryPanelElement;
         "elsa-webhook-definition-editor-notifications": HTMLElsaWebhookDefinitionEditorNotificationsElement;
         "elsa-webhook-definition-editor-screen": HTMLElsaWebhookDefinitionEditorScreenElement;
         "elsa-webhook-definitions-list-screen": HTMLElsaWebhookDefinitionsListScreenElement;
@@ -854,6 +877,11 @@ declare namespace LocalJSX {
     }
     interface ElsaCopyButton {
         "value"?: string;
+    }
+    interface ElsaCronExpressionProperty {
+        "activityModel"?: ActivityModel;
+        "propertyDescriptor"?: ActivityPropertyDescriptor;
+        "propertyModel"?: ActivityDefinitionProperty;
     }
     interface ElsaDesignerPanel {
         "culture"?: string;
@@ -1069,6 +1097,13 @@ declare namespace LocalJSX {
     }
     interface ElsaToastNotification {
     }
+    interface ElsaVersionHistoryPanel {
+        "onDeleteVersionClicked"?: (event: CustomEvent<WorkflowDefinitionVersion>) => void;
+        "onRevertVersionClicked"?: (event: CustomEvent<WorkflowDefinitionVersion>) => void;
+        "onVersionSelected"?: (event: CustomEvent<WorkflowDefinitionVersion>) => void;
+        "serverUrl"?: string;
+        "workflowDefinition"?: WorkflowDefinition;
+    }
     interface ElsaWebhookDefinitionEditorNotifications {
     }
     interface ElsaWebhookDefinitionEditorScreen {
@@ -1154,6 +1189,7 @@ declare namespace LocalJSX {
         "onExportClicked"?: (event: CustomEvent<any>) => void;
         "onImportClicked"?: (event: CustomEvent<File>) => void;
         "onPublishClicked"?: (event: CustomEvent<any>) => void;
+        "onRevertClicked"?: (event: CustomEvent<any>) => void;
         "onUnPublishClicked"?: (event: CustomEvent<any>) => void;
         "publishing"?: boolean;
         "workflowDefinition"?: WorkflowDefinition;
@@ -1185,6 +1221,7 @@ declare namespace LocalJSX {
         "elsa-context-menu": ElsaContextMenu;
         "elsa-control": ElsaControl;
         "elsa-copy-button": ElsaCopyButton;
+        "elsa-cron-expression-property": ElsaCronExpressionProperty;
         "elsa-designer-panel": ElsaDesignerPanel;
         "elsa-designer-tree": ElsaDesignerTree;
         "elsa-dictionary-property": ElsaDictionaryProperty;
@@ -1220,6 +1257,7 @@ declare namespace LocalJSX {
         "elsa-tab-content": ElsaTabContent;
         "elsa-tab-header": ElsaTabHeader;
         "elsa-toast-notification": ElsaToastNotification;
+        "elsa-version-history-panel": ElsaVersionHistoryPanel;
         "elsa-webhook-definition-editor-notifications": ElsaWebhookDefinitionEditorNotifications;
         "elsa-webhook-definition-editor-screen": ElsaWebhookDefinitionEditorScreen;
         "elsa-webhook-definitions-list-screen": ElsaWebhookDefinitionsListScreen;
@@ -1254,6 +1292,7 @@ declare module "@stencil/core" {
             "elsa-context-menu": LocalJSX.ElsaContextMenu & JSXBase.HTMLAttributes<HTMLElsaContextMenuElement>;
             "elsa-control": LocalJSX.ElsaControl & JSXBase.HTMLAttributes<HTMLElsaControlElement>;
             "elsa-copy-button": LocalJSX.ElsaCopyButton & JSXBase.HTMLAttributes<HTMLElsaCopyButtonElement>;
+            "elsa-cron-expression-property": LocalJSX.ElsaCronExpressionProperty & JSXBase.HTMLAttributes<HTMLElsaCronExpressionPropertyElement>;
             "elsa-designer-panel": LocalJSX.ElsaDesignerPanel & JSXBase.HTMLAttributes<HTMLElsaDesignerPanelElement>;
             "elsa-designer-tree": LocalJSX.ElsaDesignerTree & JSXBase.HTMLAttributes<HTMLElsaDesignerTreeElement>;
             "elsa-dictionary-property": LocalJSX.ElsaDictionaryProperty & JSXBase.HTMLAttributes<HTMLElsaDictionaryPropertyElement>;
@@ -1289,6 +1328,7 @@ declare module "@stencil/core" {
             "elsa-tab-content": LocalJSX.ElsaTabContent & JSXBase.HTMLAttributes<HTMLElsaTabContentElement>;
             "elsa-tab-header": LocalJSX.ElsaTabHeader & JSXBase.HTMLAttributes<HTMLElsaTabHeaderElement>;
             "elsa-toast-notification": LocalJSX.ElsaToastNotification & JSXBase.HTMLAttributes<HTMLElsaToastNotificationElement>;
+            "elsa-version-history-panel": LocalJSX.ElsaVersionHistoryPanel & JSXBase.HTMLAttributes<HTMLElsaVersionHistoryPanelElement>;
             "elsa-webhook-definition-editor-notifications": LocalJSX.ElsaWebhookDefinitionEditorNotifications & JSXBase.HTMLAttributes<HTMLElsaWebhookDefinitionEditorNotificationsElement>;
             "elsa-webhook-definition-editor-screen": LocalJSX.ElsaWebhookDefinitionEditorScreen & JSXBase.HTMLAttributes<HTMLElsaWebhookDefinitionEditorScreenElement>;
             "elsa-webhook-definitions-list-screen": LocalJSX.ElsaWebhookDefinitionsListScreen & JSXBase.HTMLAttributes<HTMLElsaWebhookDefinitionsListScreenElement>;

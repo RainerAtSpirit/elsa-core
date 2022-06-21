@@ -1,5 +1,7 @@
+using Elsa.Activities.Http.OpenApi;
 using Elsa.Models;
 using Elsa.Providers.Workflows;
+using Elsa.Rebus.RabbitMq;
 using Elsa.Retention.Extensions;
 using Elsa.Retention.Filters;
 using Elsa.WorkflowTesting.Api.Extensions;
@@ -89,7 +91,14 @@ namespace Elsa.Samples.Server.Host
                     // Optionally opt-out of indexing workflows stored in the database.
                     // These will be indexed when published/unpublished/deleted, so no need to do it during startup.
                     // Unless you have existing workflow definitions in the DB for which no triggers have yet been created.
-                    .ExcludeWorkflowProviderFromStartupIndexing<DatabaseWorkflowProvider>()
+                    //.ExcludeWorkflowProviderFromStartupIndexing<DatabaseWorkflowProvider>()
+                    
+                    // For distributed hosting, configure Rebus with a real message broker such as RabbitMQ or Azure Service Bus.
+                    //.UseRabbitMq(Configuration.GetConnectionString("RabbitMq"))
+                
+                    // When testing a distributed on your local machine, make sure each instance has a unique "container" name.
+                    // This name is used to create unique input queues for pub/sub messaging where the competing consumer pattern is undesirable in order to deliver a message to each subscriber.
+                    //.WithContainerName(Configuration.GetValue<string>("ContainerName") ?? System.Environment.MachineName)
                 )
                 .AddRetentionServices(options =>
                 {
@@ -107,7 +116,7 @@ namespace Elsa.Samples.Server.Host
             services
                 .AddNotificationHandlersFrom<Startup>()
                 .AddElsaApiEndpoints()
-                .AddElsaSwagger();
+                .AddElsaSwagger(options => options.DocumentFilter<HttpEndpointDocumentFilter>());
 
             // Allow arbitrary client browser apps to access the API for demo purposes only.
             // In a production environment, make sure to allow only origins you trust.
