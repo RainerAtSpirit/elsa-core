@@ -24,6 +24,7 @@ export namespace Components {
     }
     interface CorasStudioHome {
         "culture": string;
+        "serverVersion": string;
     }
     interface ElsaActivityEditorModal {
         "culture": string;
@@ -904,6 +905,7 @@ declare namespace LocalJSX {
     }
     interface CorasStudioHome {
         "culture"?: string;
+        "serverVersion"?: string;
     }
     interface ElsaActivityEditorModal {
         "culture"?: string;
