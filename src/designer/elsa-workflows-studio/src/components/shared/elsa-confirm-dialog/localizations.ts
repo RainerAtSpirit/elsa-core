@@ -16,5 +16,17 @@ export const resources = {
       'Yes': 'Ja',
       'No': 'Nee',
     }
-  }
+  },
+  'fa-IR': {
+    'default': {
+      'Yes': 'بله',
+      'No': 'خیر'
+    }
+  },
+  'de-DE': {
+    'default': {
+      'Yes': 'Ja',
+      'No': 'Nein',
+    }
+  },
 };

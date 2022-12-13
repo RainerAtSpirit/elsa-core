@@ -16,5 +16,17 @@ export const resources = {
       'Title': 'Workflow Definities',
       'CreateButton': 'Nieuwe Workflow'
     }
-  }
+  },
+  'fa-IR': {
+    default: {
+      'Title': 'مشخصات فرآیندها',
+      'CreateButton': 'ایجاد فرآیند'
+    }
+  },
+  'de-DE': {
+    default: {
+      'Title': 'Ablaufdefinitionen',
+      'CreateButton': 'Ablauf erstellen'
+    }
+  },
 };

@@ -25,5 +25,23 @@ export const resources = {
       'Import': 'Importeren',
       'Export': 'Exporteren',
     }
-  }
+  },
+  'fa-IR': {
+    'default': {
+      'Publish': 'انتشار',
+      'Publishing': 'در حال انتشار',
+      'Unpublish': 'Unpublish',
+      'Import': 'Import',
+      'Export': 'Export',
+    }
+  },
+  'de-DE': {
+    'default': {
+      'Publish': 'Veröffentlichen',
+      'Publishing': 'Am veröffentlichen',
+      'Unpublish': 'Veröffentlichung zurückziehen',
+      'Import': 'Importieren',
+      'Export': 'Exportieren',
+    }
+  },
 };

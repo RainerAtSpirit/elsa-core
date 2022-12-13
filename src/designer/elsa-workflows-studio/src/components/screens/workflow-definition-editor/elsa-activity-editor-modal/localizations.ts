@@ -97,5 +97,71 @@ export const resources = {
         }
       }
     }
-  }
+  },
+  'fa-IR': {
+    'default': {
+      "Buttons": {
+        'Save': 'ذخیره',
+        'Cancel': 'لغو'
+      },
+      'Tabs': {
+        'Properties': {
+          'Name': 'ویژگیها'
+        },
+        'Common': {
+          'Name': 'عمومی',
+          'Fields': {
+            'Name': {
+              'Label': 'نام',
+              'Hint': 'نام سیستمی Activity'
+            },
+            'DisplayName': {
+              'Label': 'عنوان نمایشی',
+              'Hint': 'عنوانی که Acitvity را توضیح میدهد'
+            },
+            'Description': {
+              'Label': 'توضیحات',
+              'Hint': 'توضیحات این Activity'
+            }
+          }
+        },
+        'Storage': {
+          'Name': 'Storage'
+        }
+      }
+    }
+  },
+  'de-DE': {
+    'default': {
+      'Buttons': {
+        'Save': 'Speichern',
+        'Cancel': 'Abbrechen'
+      },
+      'Tabs': {
+        'Properties': {
+          'Name': 'Eigenschaften'
+        },
+        'Common': {
+          'Name': 'Allgemein',
+          'Fields': {
+            'Name': {
+              'Label': 'Name',
+              'Hint': 'Der technische Name der Aktivität'
+            },
+            'DisplayName': {
+              'Label': 'Anzeigename',
+              'Hint': 'Der freundliche Name der Aktivität'
+            },
+            'Description': {
+              'Label': 'Beschreibung',
+              'Hint': 'Eine individuelle Beschreibung der Aktivität'
+            }
+          }
+        },
+        'Storage': {
+          'Name': 'Speicherort'
+        }
+      }
+    }
+  },
 };

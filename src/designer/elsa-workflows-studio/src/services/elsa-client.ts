@@ -60,10 +60,13 @@ export const createElsaClient = async function (serverUrl: string): Promise<Elsa
       }
     },
     workflowDefinitionsApi: {
-      list: async (page?: number, pageSize?: number, versionOptions?: VersionOptions) => {
+      list: async (page?: number, pageSize?: number, versionOptions?: VersionOptions, searchTerm?: string) => {
         const queryString = {
           version: getVersionOptionsString(versionOptions)
         };
+
+        if (!!searchTerm)
+          queryString['searchTerm'] = searchTerm;
 
         if (!!page || page === 0)
           queryString['page'] = page;
@@ -320,6 +323,27 @@ export const createElsaClient = async function (serverUrl: string): Promise<Elsa
         return response.data.features;
       }
     },
+    versionApi: {
+      get: async () => {
+        const response = await httpClient.get<VersionModel>('v1/version');
+        return response.data.version;
+      }
+    },
+    authenticationApi:{
+      getUserDetails: async () => {
+        const response = await httpClient.get<UserDetail>('v1/elsaAuthentication/userinfo');
+        if("text/html; charset=utf-8" !== response.headers['content-type'] && response.data.isAuthenticated)
+          {
+            return response.data;
+          }else{
+            return null;
+          }
+      },
+      getAuthenticationConfguration: async () => {
+        const response = await httpClient.get<AuthenticationConfguration>('v1/ElsaAuthentication/options');
+        return response.data;
+      }
+    }
   }
 
   return _elsaClient;
@@ -339,19 +363,29 @@ export interface ElsaClient {
   workflowChannelsApi: WorkflowChannelsApi;
   workflowTestApi: WorkflowTestApi;
   featuresApi: FeaturesApi;
+  versionApi: VersionApi;
+  authenticationApi : AuthenticationApi;
 }
 
 export interface ActivitiesApi {
   list(): Promise<Array<ActivityDescriptor>>;
+}
+export interface AuthenticationApi {
+  getUserDetails(): Promise<UserDetail>;
+  getAuthenticationConfguration(): Promise<AuthenticationConfguration>;
 }
 
 export interface FeaturesApi {
   list(): Promise<Array<string>>;
 }
 
+export interface VersionApi {
+  get(): Promise<string>;
+}
+
 export interface WorkflowDefinitionsApi {
 
-  list(page?: number, pageSize?: number, versionOptions?: VersionOptions): Promise<PagedList<WorkflowDefinitionSummary>>;
+  list(page?: number, pageSize?: number, versionOptions?: VersionOptions, searchTerm?: string): Promise<PagedList<WorkflowDefinitionSummary>>;
 
   getMany(ids: Array<string>, versionOptions?: VersionOptions): Promise<Array<WorkflowDefinitionSummary>>;
 
@@ -523,6 +557,20 @@ export interface ActivityStats {
   eventCounts: Array<ActivityEventCount>;
 }
 
+export interface UserDetail {
+  name: string;
+  tenantId : string;
+  isAuthenticated : boolean;
+}
+
+export interface AuthenticationConfguration  {
+  authenticationStyles: string[];
+  currentTenantAccessorName : string;
+  tenantAccessorKeyName:string;
+}
+
+
+
 interface ActivityEventCount {
   eventName: string;
   count: number;
@@ -534,4 +582,8 @@ interface ActivityFault {
 
 interface FeaturesModel {
   features: Array<string>;
+}
+
+interface VersionModel {
+  version: string;
 }

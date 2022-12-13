@@ -37,5 +37,31 @@ export const resources = {
       'Draft': 'Draft',
       'Properties': '{{name}} Properties'
     }
-  }
+  },
+  'fa-IR': {
+    default: {
+      'Name': 'عنوان',
+      'Untitled': 'بی نام',
+      'Id': 'شناسه',
+      'Version': 'جدیدترین ویرایش',
+      'PublishedVersion': 'ویرایش منتشر شده',
+      'Status': 'وضعیت',
+      'Published': 'منتشر شده',
+      'Draft': 'پیش نویس',
+      'Properties': '{{name}} ویژگی های'
+    }
+  },
+  'de-DE': {
+    default: {
+      'Name': 'Name',
+      'Untitled': 'Unbenannt',
+      'Id': 'Id',
+      'Version': 'Neuste Version',
+      'PublishedVersion': 'Veröffentlichte Version',
+      'Status': 'Status',
+      'Published': 'Veröffentlicht',
+      'Draft': 'Entwurf',
+      'Properties': '{{name}} Eigenschaften'
+    }
+  },
 };

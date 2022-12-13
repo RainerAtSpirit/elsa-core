@@ -92,6 +92,7 @@ export class ElsaStudioRoot {
       basePath: this.basePath,
       features: this.featuresConfig,
       serverFeatures: [],
+      serverVersion: null,
       eventBus,
       pluginManager,
       propertyDisplayManager,
@@ -105,13 +106,14 @@ export class ElsaStudioRoot {
     };
 
     this.initializing.emit(elsaStudio);
-    await eventBus.emit(EventTypes.Root.Initializing);
     pluginManager.initialize(elsaStudio);
+    await eventBus.emit(EventTypes.Root.Initializing);
     propertyDisplayManager.initialize(elsaStudio);
     featuresDataManager.initialize(elsaStudio);
 
     const elsaClient = await elsaClientFactory();
     elsaStudio.serverFeatures = await elsaClient.featuresApi.list();
+    elsaStudio.serverVersion = await elsaClient.versionApi.get();
   }
 
   async componentDidLoad() {
@@ -132,6 +134,7 @@ export class ElsaStudioRoot {
       serverUrl: this.serverUrl,
       basePath: this.basePath,
       serverFeatures: this.elsaStudio.serverFeatures,
+      serverVersion: this.elsaStudio.serverVersion,
       culture,
       monacoLibPath: this.monacoLibPath
     };

@@ -31,5 +31,27 @@ export const resources = {
       'Results': 'resultaten',
       'Display': '{{template}}'
     }
-  }
+  },
+  'fa-IR':{
+    'default': {
+      'Previous': 'قبلی',
+      'Next': 'بعدی',
+      'From': 'از',
+      'To': 'تا',
+      'Of': 'از',
+      'Results': 'نتیجه',
+      'Display': '{{template}}'
+    }
+  },
+  'de-DE': {
+    'default': {
+      'Previous': 'Vorherige',
+      'Next': 'Nächste',
+      'From': 'Von',
+      'To': 'bis',
+      'Of': 'von',
+      'Results': 'Ergebnissen',
+      'Display': '{{template}}'
+    }
+  },
 };

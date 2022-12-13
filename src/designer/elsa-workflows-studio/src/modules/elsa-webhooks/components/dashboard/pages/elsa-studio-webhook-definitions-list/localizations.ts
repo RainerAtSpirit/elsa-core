@@ -16,5 +16,17 @@ export const resources = {
       'Title': 'Webhook Definitie',
       'CreateButton': 'Maak Webhook'
     }
-  }
+  },
+  'fa-IR': {
+    default: {
+      'Title': 'هاWebhook مشخصات',
+      'CreateButton': 'ایجاد Webhook'
+    }
+  },
+  'de-Ide': {
+    default: {
+      'Title': 'Webhook Definitionen',
+      'CreateButton': 'Webhook erstellen'
+    }
+  },
 };

@@ -28,5 +28,25 @@ export const resources = {
       'RestartInstanceConfirmationModel.Title': 'Werkstroom Is Al Actief',
       'RestartInstanceConfirmationModel.Message': 'Het lijkt erop dat er al een ander exemplaar van deze workflow actief is. Wil je het stoppen en een nieuwe beginnen?'
     }
-  }
+  },
+  'fa-IR': {
+    default: {
+      'ExecuteWorkflow': 'اجرای فرآیند',
+      'StopWorkflow': 'توفق فرآیند',
+      'EntryEndpoint': 'Entry Endpoint',
+      'Status': 'وضعیت',
+      'RestartInstanceConfirmationModel.Title': 'فرآیند در حال اجرا است.',
+      'RestartInstanceConfirmationModel.Message': 'جریان دیگری از این فرآیند در حال اجراست، آیا مایلید فرآیند جاری متوقف و فرآیند جدیدی اجرا شود؟?'
+    }
+  },
+  'de-DE': {
+    default: {
+      'ExecuteWorkflow': 'Ablauf ausführen',
+      'StopWorkflow': 'Ablauf stoppen',
+      'EntryEndpoint': 'Startpunkt',
+      'Status': 'Status',
+      'RestartInstanceConfirmationModel.Title': 'Der Ablauf läuft bereits',
+      'RestartInstanceConfirmationModel.Message': 'Es sieht so aus, als würde der Ablauf bereits laufen. Wollen Sie den Ablauf stoppen und einen neuen starten?'
+    }
+  },
 };

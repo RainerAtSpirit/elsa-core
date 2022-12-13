@@ -77,14 +77,14 @@ export class ElsaWorkflowInstanceJournal {
 
   getEventColor(eventName: string) {
     const map = {
-      Executing: 'blue',
-      Executed: 'green',
-      Faulted: 'rose',
-      Warning: 'yellow',
-      Information: 'blue',
+      'Executing': 'elsa-bg-blue-500',
+      'Executed': 'elsa-bg-green-500',
+      'Faulted': 'elsa-bg-rose-500',
+      'Warning': 'elsa-bg-yellow-500',
+      'Information': 'elsa-bg-blue-500',
     };
 
-    return map[eventName] || 'gray';
+    return map[eventName] || 'elsa-bg-gray-500';
   }
 
   getStatusColor(status: WorkflowStatus) {
@@ -157,6 +157,7 @@ export class ElsaWorkflowInstanceJournal {
     const workflowBlueprint = this.workflowBlueprint;
     const activityBlueprints: Array<ActivityBlueprint> = workflowBlueprint.activities || [];
     const selectedRecordId = this.selectedRecordId;
+    
 
     const renderRecord = (record: WorkflowExecutionLogRecord, index: number) => {
       var prevItemReverseIndex = allItems
@@ -239,7 +240,7 @@ export class ElsaWorkflowInstanceJournal {
               <div class="elsa-relative elsa-flex elsa-space-x-3">
                 <div>
                   <span
-                    class="elsa-h-8 elsa-w-8 elsa-rounded-full elsa-bg-green-500 elsa-flex elsa-items-center elsa-justify-center elsa-ring-8 elsa-ring-white elsa-mr-1"
+                    class={`elsa-h-8 elsa-w-8 elsa-rounded-full ${eventColor} elsa-flex elsa-items-center elsa-justify-center elsa-ring-8 elsa-ring-white elsa-mr-1`}
                     innerHTML={activityIcon}/>
                 </div>
                 <div class="elsa-min-w-0 elsa-flex-1 elsa-pt-1.5 elsa-flex elsa-justify-between elsa-space-x-4">

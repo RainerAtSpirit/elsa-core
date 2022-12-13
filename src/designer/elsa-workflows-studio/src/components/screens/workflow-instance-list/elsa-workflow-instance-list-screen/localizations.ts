@@ -159,5 +159,169 @@ export const resources = {
   },
   'nl-NL': {
     'default': {}
-  }
+  },
+  'fa-IR': {
+    'default': {
+      'Title': 'جریان ها',
+      'Search': 'جستجو',
+      'Untitled': 'بی نام',
+      'Table': {
+        'Id': 'شناسه',
+        'CorrelationId': 'Correlation ID',
+        'Workflow': 'فرآیند',
+        'Version': 'ویرایش',
+        'InstanceName': 'نام جریان',
+        'Status': 'وضعیت',
+        'Created': 'ایجاد شده',
+        'Finished': 'پایان یافته ',
+        'LastExecuted': 'آخرین اجرا',
+        'Faulted': 'با خطا مواجه شده',
+        'ContextMenu': {
+          'View': 'مشاهده',
+          'Cancel': 'لغو',
+          'Delete': 'حذف',
+          'Retry': 'تلاش مجدد'
+        }
+      },
+      'CancelDialog': {
+        'Title': 'لغو اجرای فرآیند',
+        'Message': 'آیا از لغو اجرای این فرآیند اطمینان دارید؟'
+      },
+      'DeleteDialog': {
+        'Title': 'حذف جریان فرآیند',
+        'Message': 'آیا از حذف این اجرای فرآیند اطمینان دارید؟'
+      },
+      'BulkCancelDialog': {
+        'Title': 'لغو اجراهای انتخاب شده',
+        'Message': 'آیا از لغو همه اجراهای انتخاب شده اطمینان دارید؟'
+      },
+      'BulkDeleteDialog': {
+        'Title': 'حذف اجراهای انتخاب شده',
+        'Message': 'آیا از حذف همه اجراهای انتخاب شده اطمینان دارید؟?'
+      },
+      'BulkRetryDialog': {
+        'Title': 'اجرای مجدد اجراهای انتخاب شده',
+        'Message': 'آیااز اجرای مجدد اجراهای انتخاب شده اطمینان دارید؟'
+      },
+      'Pager': {
+        'Display': '{{Start}} تا {{End}} از {{Results}} نتیجه'
+      },
+      'BulkActions': {
+        'Title': 'عملیات گروهی',
+        'Actions': {
+          'Cancel': 'لغو',
+          'Delete': 'حذف',
+          'Retry': 'اجرای مجدد'
+        }
+      },
+      'Filters': {
+        'Workflow': {
+          'Label': 'فرآیند',
+          'All': 'همه'
+        },
+        'Status': {
+          'All': 'همه',
+          'Label': 'وضعیت',
+          'Running': 'در حال اجرا',
+          'Idle': 'Idle',
+          'Suspended': 'تعلیف شده',
+          'Faulted': 'با خطا مواجه شده',
+          'Finished': 'پایان یافته',
+          'Cancelled': 'لغو شده'
+        },
+        'Sort': {
+          'Label': 'مرتب سازی',
+          'SelectedLabel': 'بر اساس: {{Key}}',
+          'Finished': 'پایان یافته',
+          'LastExecuted': 'آخرین اجرا',
+          'Started': 'شروع شده'
+        },
+        'PageSize': {
+          'SelectedLabel': 'تعداد در صفحه: {{Size}}',
+        }
+      }
+    }
+  },
+  'de-DE': {
+    'default': {
+      'Title': 'Ablaufinstanzen',
+      'Search': 'Suchen',
+      'Untitled': 'Unbenannt',
+      'Table': {
+        'Id': 'ID',
+        'CorrelationId': 'Correlation ID',
+        'Workflow': 'Ablauf',
+        'Version': 'Version',
+        'InstanceName': 'Instanzname',
+        'Status': 'Status',
+        'Created': 'Erstellt',
+        'Finished': 'Abgeschlossen',
+        'LastExecuted': 'Zuletzt ausgeführt',
+        'Faulted': 'Fehlgeschlagen',
+        'ContextMenu': {
+          'View': 'Ansehen',
+          'Cancel': 'Abbrechen',
+          'Delete': 'Entfernen',
+          'Retry': 'Nochmal ausführen'
+        }
+      },
+      'CancelDialog': {
+        'Title': 'Ablaufinstanz abbrechen',
+        'Message': 'Sind Sie sicher, dass Sie die Instanz abbrechen wollen?'
+      },
+      'DeleteDialog': {
+        'Title': 'Ablauf entfernen',
+        'Message': 'Sind Sie sicher, dass Sie die Instanz unwiderruflich entfernen wollen?'
+      },
+      'BulkCancelDialog': {
+        'Title': 'Ausgewählte Instanzen abbrechen',
+        'Message': 'Sind Sie sicher, dass Sie die ausgewählten Instanzen abbrechen wollen?'
+      },
+      'BulkDeleteDialog': {
+        'Title': 'Ausgewählte Instanzen entfernen',
+        'Message': 'Sind Sie sicher, dass Sie die ausgewählten Instanzen entfernen wollen?'
+      },
+      'BulkRetryDialog': {
+        'Title': 'Ausgewählte Instanzen nochmal ausführen',
+        'Message': 'Sind Sie sicher, dass Sie die ausgwählten Instanzen noch einmal ausführen wollen?'
+      },
+      'Pager': {
+        'Display': 'Zeige {{Start}} bis {{End}} von {{Results}} Ergebnissen'
+      },
+      'BulkActions': {
+        'Title': 'Massenaktionen',
+        'Actions': {
+          'Cancel': 'Abbrechen',
+          'Delete': 'Entfernen',
+          'Retry': 'Erneut ausführen'
+        }
+      },
+      'Filters': {
+        'Workflow': {
+          'Label': 'Ablauf',
+          'All': 'Alle'
+        },
+        'Status': {
+          'All': 'Alle',
+          'Label': 'Status',
+          'Running': 'Laufend',
+          'Idle': 'Inaktive',
+          'Suspended': 'Angehalten',
+          'Faulted': 'Fehlgeschlagen',
+          'Finished': 'Abgeschlossen',
+          'Cancelled': 'Abgebrochen'
+        },
+        'Sort': {
+          'Label': 'Sortierung',
+          'SelectedLabel': 'Sortieren nach: {{Key}}',
+          'Finished': 'Abgeschlossen',
+          'LastExecuted': 'Zuletzt ausgeführt',
+          'Started': 'Gestartet'
+        },
+        'PageSize': {
+          'SelectedLabel': 'Seitengröße: {{Size}}',
+        }
+      }
+    }
+  },
 };

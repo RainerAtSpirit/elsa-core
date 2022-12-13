@@ -16,5 +16,17 @@ export const resources = {
       'Title': 'Workflow Register',
       'CreateButton': 'Nieuwe Workflow'
     }
-  }
+  },
+  'fa-IR': {
+    default: {
+      'Title': 'لیست فرآیندها',
+      'CreateButton': 'ایجاد فرآیند'
+    }
+  },
+  'de-DE': {
+    default: {
+      'Title': 'Ablaufverzeichnis',
+      'CreateButton': 'Ablauf erstellen'
+    }
+  },
 };

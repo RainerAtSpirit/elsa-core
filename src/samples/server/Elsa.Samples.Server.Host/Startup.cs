@@ -1,4 +1,6 @@
+using Elsa.Activities.Sql.Activities;
 using Elsa.Activities.Http.OpenApi;
+using Elsa.Design;
 using Elsa.Models;
 using Elsa.Providers.Workflows;
 using Elsa.Rebus.RabbitMq;
@@ -14,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NodaTime;
 using NodaTime.Serialization.JsonNet;
+using Elsa.Retention.Specifications;
 
 namespace Elsa.Samples.Server.Host
 {
@@ -79,6 +82,7 @@ namespace Elsa.Samples.Server.Host
                 typeof(WorkflowSettings.Persistence.YesSql.SqlServerStartup),
                 typeof(WorkflowSettings.Persistence.YesSql.MySqlStartup),
                 typeof(WorkflowSettings.Persistence.YesSql.PostgreSqlStartup),
+                typeof(Secrets.Persistence.EntityFramework.Sqlite.Startup)
             };
 
             services
@@ -105,6 +109,12 @@ namespace Elsa.Samples.Server.Host
                     // Bind options from configuration.
                     elsaSection.GetSection("Retention").Bind(options);
 
+
+                    // Configure a custom specification filter (server side) pipeline that deletes cancelled, faulted and completed workflows.
+                    options.ConfigureSpecificationFilter = filter => filter.AddAndSpecification(
+                        new WorkflowStatusFilterSpecification(WorkflowStatus.Cancelled, WorkflowStatus.Faulted, WorkflowStatus.Finished))
+                    ;
+                    
                     // Configure a custom filter pipeline that deletes completed AND faulted workflows.
                     options.ConfigurePipeline = pipeline => pipeline
                         .AddFilter(new WorkflowStatusFilter(WorkflowStatus.Cancelled, WorkflowStatus.Faulted, WorkflowStatus.Finished))

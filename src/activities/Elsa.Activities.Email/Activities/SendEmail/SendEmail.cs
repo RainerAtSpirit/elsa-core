@@ -26,7 +26,7 @@ namespace Elsa.Activities.Email
     [Action(
         Category = "Email",
         Description = "Send an email message.",
-        Outcomes = new[] { OutcomeNames.Done, "Unexpected Error" }
+        Outcomes = new[] { OutcomeNames.Done, "Success", "Unexpected Error" }
     )]
     public class SendEmail : Activity
     {
@@ -121,6 +121,9 @@ namespace Elsa.Activities.Email
 
             if (attachments != null)
             {
+                if (attachments is string && string.IsNullOrWhiteSpace((string)attachments))
+                    return;
+                    
                 var index = 0;
                 var attachmentObjects = InterpretAttachmentsModel(attachments);
 

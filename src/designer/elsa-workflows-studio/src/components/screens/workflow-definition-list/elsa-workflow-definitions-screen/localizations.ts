@@ -40,5 +40,33 @@ export const resources = {
         'Message': 'Weet je zeker dat je deze workflow permanent wilt verwijderen, inclusief alle bijbehorende workflow instanties?'
       }
     }
-  }
+  },
+  'fa-IR': {
+    'default': {
+      'Name': 'نام',
+      'Instances': 'جریانها',
+      'LatestVersion': 'جدیدترین ویرایش',
+      'PublishedVersion': 'ویرایش منتشر شده',
+      'Edit': 'ویرایش',
+      'Delete': 'حذف',
+      'DeleteConfirmationModel': {
+        'Title': 'حذف تعریف فرآیند',
+        'Message': 'آیا از حذف این فرآیند و همه جریانهای آن اطمینان دارید?'
+      }
+    }
+  },
+  'de-DE': {
+    'default': {
+      'Name': 'Name',
+      'Instances': 'Instanzen',
+      'LatestVersion': 'Neuste Version',
+      'PublishedVersion': 'Veröffentlichte Version',
+      'Edit': 'Bearbeiten',
+      'Delete': 'Entfernen',
+      'DeleteConfirmationModel': {
+        'Title': 'Ablaufdefinition entfernen',
+        'Message': 'Sind Sie sicher, dass sie die Definition und die dazugehörigen Instanzen unwiderruflich löschen wollen?'
+      }
+    }
+  },
 };
